@@ -49,6 +49,10 @@ public class GUI extends JFrame {
  private ParkingsPanel parkingsPanel;     
  
  private Parkingviewpanel parkingPanelMapa; 
+ 
+ private String ultimoParkingSeleccionado = null;
+ 
+ private int ultimaPlantaSeleccionada = -1; 
 
  public GUI() {
 
@@ -216,9 +220,30 @@ public class GUI extends JFrame {
      }
  });
 
- this.setVisible(true); 
+ parkingsPanel.getBtnContinuar().addActionListener(new ActionListener() {
+     @Override
+     public void actionPerformed(ActionEvent e) {
+         // Guardamos la elección del usuario (por si luego la quieres usar en el mapa)
+         if (parkingsPanel.getParkingSeleccionado() != null) {
+             ultimoParkingSeleccionado = parkingsPanel.getParkingSeleccionado().getNombre(); // Deusto/Leioa/San Mamés
+         } else {
+             ultimoParkingSeleccionado = null;
+         }
+         ultimaPlantaSeleccionada = parkingsPanel.getPlantaSeleccionada(); // 1..N
 
- }
+         // (Opcional) Puedes mostrar un recordatorio con la selección
+         // JOptionPane.showMessageDialog(parentFrame, 
+         //     "Has elegido: " + ultimoParkingSeleccionado + " - Planta " + ultimaPlantaSeleccionada);
+
+         // Navegamos al mapa como antes
+         cardLayout.show(contentPanel, "MAPA");
+     }
+ });
+
+ this.setVisible(true); 
+}
+ 
+
 
 
 
