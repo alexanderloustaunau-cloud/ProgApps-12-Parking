@@ -48,6 +48,7 @@ public class ReservationDialog extends JDialog {
  private boolean estaOcupada = false;
 
 
+ private boolean reservaConfirmada = false;
 
  public ReservationDialog(JFrame owner, String estadoPlaza) {
 
@@ -197,7 +198,7 @@ public class ReservationDialog extends JDialog {
 
  System.out.println("Hora: " + hora);
 
- 
+ reservaConfirmada = true;
 
  dispose(); 
 
@@ -226,7 +227,6 @@ public class ReservationDialog extends JDialog {
  JOptionPane.WARNING_MESSAGE
 
  );
-
  dispose();
 
  }
@@ -241,7 +241,9 @@ public class ReservationDialog extends JDialog {
 
  }
 
- 
+ public boolean isReservaConfirmada() {
+	 return reservaConfirmada;
+ }
 
  public void setPlaza(String numeroPlaza) {
 

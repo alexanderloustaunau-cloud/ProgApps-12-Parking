@@ -117,7 +117,10 @@ public class Parkingviewpanel extends JPanel {
  dialog.setPlaza(plaza.getText());
 
  dialog.setVisible(true);
-
+if(dialog.isReservaConfirmada()) {
+	plaza.setBackground(COLOR_OCUPADO);
+	plaza.setToolTipText("Plaza Ocupada");
+}
  
 
  } else {
