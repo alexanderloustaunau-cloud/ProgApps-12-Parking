@@ -47,8 +47,8 @@ public class GUI extends JFrame {
         menuPanel.setPreferredSize(new Dimension(150, this.getHeight()));
         menuPanel.setBackground(new Color(40, 40, 40));
         
-        String[] botones = {"Ubicaciones", "Reservaciones", "Mi Perfil", "Ayuda"};
-        String[] tarjetas = {"UBICACIONES", "RESERVACIONES", "MI_PERFIL", "AYUDA"};
+        String[] botones = {"Ubicaciones", "Reservas", "Mi Perfil", "Ayuda"};
+        String[] tarjetas = {"UBICACIONES", "RESERVAS", "MI_PERFIL", "AYUDA"};
         
         JButton btnReservar = new JButton("RESERVAR PLAZA");
         btnReservar.setBackground(new Color(0, 150, 0));
@@ -99,7 +99,7 @@ public class GUI extends JFrame {
     private JPanel createReservationsPanel() {
         JPanel panel = new JPanel(new GridLayout(2, 1));
         panel.setBackground(new Color(255, 230, 230));
-        JLabel titulo = new JLabel("Historial de Reservaciones", SwingConstants.CENTER);
+        JLabel titulo = new JLabel("Historial de Reservas", SwingConstants.CENTER);
         titulo.setFont(new Font("Arial", Font.BOLD, 20));
         panel.add(titulo);
         JLabel lista = new JLabel("Aquí irá la tabla de reservas pasadas y activas.", SwingConstants.CENTER);
