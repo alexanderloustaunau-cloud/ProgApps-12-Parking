@@ -42,13 +42,13 @@ public class GUI extends JFrame {
 
  private CardLayout cardLayout = new CardLayout();
 
- private JPanel contentPanel = new JPanel();
-
- 
+ private JPanel contentPanel = new JPanel();   
 
  private final JFrame parentFrame = this; 
 
-
+ private ParkingsPanel parkingsPanel;     
+ 
+ private Parkingviewpanel parkingPanelMapa; 
 
  public GUI() {
 
@@ -67,8 +67,9 @@ public class GUI extends JFrame {
  contentPanel.setLayout(cardLayout);
 
 
+ parkingsPanel = new ParkingsPanel(ParkingDataProvider.getParkings());
 
- Parkingviewpanel parkingPanel = new Parkingviewpanel(parentFrame); 
+ parkingPanelMapa = new Parkingviewpanel(parentFrame);
 
  JPanel reservationsPanel = createReservationsPanel();
 
@@ -77,8 +78,9 @@ public class GUI extends JFrame {
  JPanel helpPanel = createGenericPanel("Ayuda");
 
 
-
- contentPanel.add(parkingPanel, "UBICACIONES");
+ contentPanel.add(parkingsPanel, "UBICACIONES");
+ 
+ contentPanel.add(parkingPanelMapa, "MAPA");
 
  contentPanel.add(reservationsPanel, "RESERVAS"); 
 
@@ -204,7 +206,15 @@ public class GUI extends JFrame {
 
  this.add(contentPanel, BorderLayout.CENTER); 
 
-
+ parkingsPanel.getBtnContinuar().addActionListener(new ActionListener() {
+     @Override
+     public void actionPerformed(ActionEvent e) {
+         // En esta iteración solo navegamos. Más adelante, si quieres,
+         // podemos usar la selección (nombre parking, nº planta) para
+         // mostrar un encabezado o sincronizar ocupación real.
+         cardLayout.show(contentPanel, "MAPA");
+     }
+ });
 
  this.setVisible(true); 
 
