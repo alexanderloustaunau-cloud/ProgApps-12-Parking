@@ -98,6 +98,26 @@ public class ReservationDialog extends JDialog {
 
  formPanel.add(fieldHoraEntrada);
 
+ fieldHoraEntrada.addKeyListener(new java.awt.event.KeyAdapter() {
+	    @Override
+	    public void keyTyped(java.awt.event.KeyEvent e) {
+	        char c = e.getKeyChar();
+
+	        if (!Character.isDigit(c) && c != ':') {
+	            e.consume();
+	            JOptionPane.showMessageDialog(
+	                ReservationDialog.this,
+	                "Solo se permiten números y el símbolo ':' para la hora (ej: 14:30).",
+	                "Entrada inválida",
+	                JOptionPane.ERROR_MESSAGE
+	            );
+	            return;
+	        }
+
+	        
+	    }
+	});
+
  
 
  if (estaOcupada) {
