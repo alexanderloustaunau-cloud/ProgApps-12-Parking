@@ -38,7 +38,7 @@ public class GUI extends JFrame {
         JPanel helpPanel = createGenericPanel("Ayuda");
 
         contentPanel.add(parkingPanel, "UBICACIONES");
-        contentPanel.add(reservationsPanel, "RESERVASK");
+        contentPanel.add(reservationsPanel, "RESERVASK1");
         contentPanel.add(profilePanel, "MI_PERFIL");
         contentPanel.add(helpPanel, "AYUDA");
         
