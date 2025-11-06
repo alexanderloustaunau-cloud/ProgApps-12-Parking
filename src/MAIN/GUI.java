@@ -213,9 +213,6 @@ public class GUI extends JFrame {
  parkingsPanel.getBtnContinuar().addActionListener(new ActionListener() {
      @Override
      public void actionPerformed(ActionEvent e) {
-         // En esta iteración solo navegamos. Más adelante, si quieres,
-         // podemos usar la selección (nombre parking, nº planta) para
-         // mostrar un encabezado o sincronizar ocupación real.
          cardLayout.show(contentPanel, "MAPA");
      }
  });
@@ -223,19 +220,13 @@ public class GUI extends JFrame {
  parkingsPanel.getBtnContinuar().addActionListener(new ActionListener() {
      @Override
      public void actionPerformed(ActionEvent e) {
-         // Guardamos la elección del usuario (por si luego la quieres usar en el mapa)
          if (parkingsPanel.getParkingSeleccionado() != null) {
-             ultimoParkingSeleccionado = parkingsPanel.getParkingSeleccionado().getNombre(); // Deusto/Leioa/San Mamés
+             ultimoParkingSeleccionado = parkingsPanel.getParkingSeleccionado().getNombre(); 
          } else {
              ultimoParkingSeleccionado = null;
          }
-         ultimaPlantaSeleccionada = parkingsPanel.getPlantaSeleccionada(); // 1..N
+         ultimaPlantaSeleccionada = parkingsPanel.getPlantaSeleccionada();
 
-         // (Opcional) Puedes mostrar un recordatorio con la selección
-         // JOptionPane.showMessageDialog(parentFrame, 
-         //     "Has elegido: " + ultimoParkingSeleccionado + " - Planta " + ultimaPlantaSeleccionada);
-
-         // Navegamos al mapa como antes
          cardLayout.show(contentPanel, "MAPA");
      }
  });
