@@ -44,6 +44,8 @@ public class ReservationDialog extends JDialog {
  private JTextField fieldPatente;
 
  private JTextField fieldHoraEntrada;
+ 
+ private JTextField fieldEstancia;
 
  private boolean estaOcupada = false;
 
@@ -74,7 +76,7 @@ public class ReservationDialog extends JDialog {
 
 
 
- JPanel formPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+ JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 10));
 
  
 
@@ -83,6 +85,9 @@ public class ReservationDialog extends JDialog {
  fieldPatente = new JTextField(10);
 
  fieldHoraEntrada = new JTextField(10);
+ 
+ fieldEstancia = new JTextField(10);
+ 
 
 
 
@@ -97,6 +102,9 @@ public class ReservationDialog extends JDialog {
  formPanel.add(new JLabel(" Hora de Entrada (Ej. 14:30):"));
 
  formPanel.add(fieldHoraEntrada);
+ 
+ formPanel.add(new JLabel("Horas de Estancia"));
+ formPanel.add(fieldEstancia);
 
  fieldHoraEntrada.addKeyListener(new java.awt.event.KeyAdapter() {
 	    @Override
@@ -117,6 +125,20 @@ public class ReservationDialog extends JDialog {
 	        
 	    }
 	});
+ fieldEstancia.addKeyListener(new java.awt.event.KeyAdapter() {
+	 @Override
+	    public void keyTyped(java.awt.event.KeyEvent z) {
+	        char k = z.getKeyChar();
+	        if(!Character.isDigit(k)) {
+	        	z.consume();
+	        	JOptionPane.showMessageDialog(ReservationDialog.this,
+	                "Solo se permiten números ",
+	                "Entrada inválida",
+	                JOptionPane.ERROR_MESSAGE);
+	        }
+	 }
+	 
+ });
 
  
 
@@ -199,11 +221,11 @@ public class ReservationDialog extends JDialog {
  JOptionPane.showMessageDialog(
 
  ReservationDialog.this, 
-
- "¡Reserva confirmada con éxito!\nPlaza: " + fieldPlaza.getText() + ", Matrícula: " + patente,
-
- "Reserva Exitosa",
-
+ "¡Reserva confirmada con éxito!\n" +
+		    "Plaza: " + fieldPlaza.getText() + "\n" +
+		    "Matrícula: " + patente + "\n" +
+		    "Duración de estancia: " + fieldEstancia.getText() + " horas",
+		    "Reserva Exitosa",
  JOptionPane.INFORMATION_MESSAGE
 
  );
@@ -217,7 +239,7 @@ public class ReservationDialog extends JDialog {
  System.out.println("Plaza: " + fieldPlaza.getText());
 
  System.out.println("Hora: " + hora);
-
+ 
  reservaConfirmada = true;
 
  dispose(); 
