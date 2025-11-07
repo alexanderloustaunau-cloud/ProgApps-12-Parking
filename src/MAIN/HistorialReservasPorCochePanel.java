@@ -15,7 +15,7 @@ public class HistorialReservasPorCochePanel extends JPanel {
         this.datos = datos;
 
         setBackground(new Color(255, 230, 230));
-        setLayout(new GridLayout(2, 1)); // título + "tabla"
+        setLayout(new GridLayout(2, 1)); 
 
         JLabel titulo = new JLabel("Historial de Reservas — " + coche, SwingConstants.CENTER);
         titulo.setFont(new Font("Arial", Font.BOLD, 20));
@@ -24,7 +24,7 @@ public class HistorialReservasPorCochePanel extends JPanel {
         add(crearTabla(this.cabeceras, this.datos));
     }
 
-    // Si algún día quieres reutilizar el panel para otra matrícula:
+    
     public void setDatos(String coche, String[][] nuevosDatos) {
         this.coche = coche;
         this.datos = nuevosDatos;
@@ -50,7 +50,7 @@ public class HistorialReservasPorCochePanel extends JPanel {
         JPanel tabla = new JPanel(new GridLayout(filas, columnas));
         tabla.setBackground(new Color(255, 230, 230));
 
-        // Cabeceras
+
         for (int j = 0; j < columnas; j++) {
             JLabel h = new JLabel(cabeceras[j], SwingConstants.CENTER);
             h.setFont(new Font("Arial", Font.BOLD, 14));
@@ -58,7 +58,7 @@ public class HistorialReservasPorCochePanel extends JPanel {
         }
 
         if (filasDatos > 0) {
-            // Filas de datos
+        
             for (int i = 0; i < filasDatos; i++) {
                 for (int j = 0; j < columnas; j++) {
                     JLabel celda = new JLabel(datos[i][j], SwingConstants.CENTER);
@@ -67,7 +67,7 @@ public class HistorialReservasPorCochePanel extends JPanel {
                 }
             }
         } else {
-            // Mensaje “sin datos”
+           
             for (int j = 0; j < columnas; j++) {
                 JLabel celda = new JLabel(j == 0 ? "Sin reservas para este coche" : "", SwingConstants.CENTER);
                 celda.setFont(new Font("Arial", Font.PLAIN, 13));
