@@ -86,7 +86,7 @@ public class GUI extends JFrame {
  
  contentPanel.add(parkingPanelMapa, "MAPA");
 
- contentPanel.add(reservationsPanel, "RESERVAS"); 
+ contentPanel.add(reservationsPanel, "RESERVASk"); 
 
  contentPanel.add(profilePanel, "MI_PERFIL");
 
