@@ -18,7 +18,7 @@ public class HistorialReservas extends JFrame {
     
     public HistorialReservas(Parking parking) {
         this.listacoches = parking.getListaCoches();
-        }
+    }
     
     public HistorialReservas() {
         setTitle("Historial de Reservas");
