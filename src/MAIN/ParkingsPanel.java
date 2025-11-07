@@ -17,6 +17,8 @@ import Clases.Parking;
 
 public class ParkingsPanel extends JPanel {
 
+    private static final long serialVersionUID = 1L;
+
     private final List<Parking> parkings;
     private final JComboBox<String> comboParkings;
     private final JComboBox<Integer> comboPlantas;   
