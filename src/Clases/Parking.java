@@ -6,6 +6,7 @@ import java.util.List;
 public class Parking {
 	private String nombre;
 	private List<Planta> plantas;
+	private List<Coche> listacoches;
 	public Parking(String nombre, List<Planta> plantas) {
 		super();
 		this.nombre = nombre;
@@ -27,6 +28,9 @@ public class Parking {
 	}
 	public List<Planta> getPlantas() {
 		return plantas;
+	}
+	public List<Coche> getListaCoches() {
+		return listacoches;
 	}
 	public void setPlantas(List<Planta> plantas) {
 		this.plantas = plantas;
