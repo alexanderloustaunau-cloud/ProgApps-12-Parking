@@ -115,7 +115,7 @@ public class ParkingsPanel extends JPanel {
         return val == null ? -1 : val.intValue();
     }
 
-    /
+    
     public JButton getBtnContinuar() {
         return btnContinuar;
     }
