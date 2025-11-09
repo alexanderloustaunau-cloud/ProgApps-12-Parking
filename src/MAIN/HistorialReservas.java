@@ -1,6 +1,7 @@
 package MAIN;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Dimension;
@@ -20,32 +21,39 @@ import javax.swing.table.DefaultTableModel;
 
 public class HistorialReservas extends JPanel {
 
-    // --- “BD” muy simple en memoria: matrícula -> lista de reservas
+   
     private final Map<String, List<Reserva>> reservasDB = new HashMap<>();
 
-    // --- componentes que necesitamos modificar ---
+   
     private final JLabel lblTitulo = new JLabel("INTRODUZCA SU MATRÍCULA:", SwingConstants.CENTER);
+    private final JLabel lblSubtitulo = new JLabel("(Ej ; 1234ABC)", SwingConstants.CENTER);
     public final JTextField txtMatricula = new JTextField(28);
     public final JButton btnAceptar = new JButton("Aceptar");
     private final JButton btnVolver = new JButton("Volver");
 
-    // contenedor central que iremos sustituyendo (formulario → historial)
+   
     private final JPanel centro = new JPanel();
 
     public HistorialReservas() {
         setLayout(new BorderLayout());
-        cargarBDDeEjemplo(); // <<---- aquí metemos la matrícula de ejemplo con 2 reservas
+        cargaEjemplo(); 
 
-        // Título grande arriba
+        
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 30));
         lblTitulo.setBorder(BorderFactory.createEmptyBorder(100, 0, 10, 0));
-        add(lblTitulo, BorderLayout.NORTH);
+        lblSubtitulo.setFont(new Font("Arial", Font.ITALIC, 16));
 
-        // Formulario inicial
+        
+        JPanel cabecera = new JPanel(new GridLayout(2, 1));
+        cabecera.add(lblTitulo);
+        cabecera.add(lblSubtitulo);
+        add(cabecera, BorderLayout.NORTH);
+
+       
         construirFormulario();
         add(centro, BorderLayout.CENTER);
 
-        // Aceptar
+       
         btnAceptar.addActionListener(e -> {
             String m = txtMatricula.getText().trim().toUpperCase();
             if (m.isEmpty()) {
@@ -55,19 +63,21 @@ public class HistorialReservas extends JPanel {
                 return;
             }
             lblTitulo.setText("MATRÍCULA INTRODUCIDA: " + m);
+            lblSubtitulo.setVisible(false);
             mostrarHistorial(m);
         });
 
-        // Volver
+       
         btnVolver.addActionListener(e -> {
             lblTitulo.setText("INTRODUZCA SU MATRÍCULA:");
+            lblSubtitulo.setVisible(true); 
             txtMatricula.setText("");
             construirFormulario();
             txtMatricula.requestFocus();
         });
     }
 
-    // ================== UI sencilla ==================
+  
 
     private void construirFormulario() {
         centro.removeAll();
@@ -83,6 +93,7 @@ public class HistorialReservas extends JPanel {
         JPanel filaBoton = new JPanel(new FlowLayout(FlowLayout.CENTER));
         btnAceptar.setPreferredSize(new Dimension(200, 60));
         btnAceptar.setFont(new Font("Arial", Font.BOLD, 22));
+        btnAceptar.setBackground(new Color(120, 230, 140));
         filaBoton.add(btnAceptar);
         centro.add(filaBoton);
 
@@ -95,13 +106,13 @@ public class HistorialReservas extends JPanel {
         centro.setLayout(new BorderLayout());
         centro.setBorder(BorderFactory.createEmptyBorder(30, 40, 40, 40));
 
-        // Subtítulo
+     
         JLabel subtitulo = new JLabel("Historial de reservas para: " + matricula, SwingConstants.CENTER);
         subtitulo.setFont(new Font("Arial", Font.BOLD, 22));
         subtitulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         centro.add(subtitulo, BorderLayout.NORTH);
 
-        // Tabla (si hay), o mensaje si no hay
+       
         List<Reserva> reservas = reservasDB.getOrDefault(matricula, Collections.emptyList());
         if (reservas.isEmpty()) {
             JLabel msg = new JLabel("No hay ninguna reserva registrada.", SwingConstants.CENTER);
@@ -112,10 +123,11 @@ public class HistorialReservas extends JPanel {
             centro.add(new JScrollPane(tabla), BorderLayout.CENTER);
         }
 
-        // Botón volver
+     
         JPanel pie = new JPanel(new FlowLayout(FlowLayout.CENTER));
         btnVolver.setPreferredSize(new Dimension(180, 50));
         btnVolver.setFont(new Font("Arial", Font.BOLD, 18));
+        btnVolver.setBackground(new Color(255, 105, 97));
         pie.add(btnVolver);
         centro.add(pie, BorderLayout.SOUTH);
 
@@ -137,10 +149,10 @@ public class HistorialReservas extends JPanel {
         return tabla;
     }
 
-    // ================== “BD” de ejemplo ==================
+    
 
-    private void cargarBDDeEjemplo() {
-        // Matrícula con reservas de ejemplo (cámbiala si quieres)
+    private void cargaEjemplo() {
+        
         String mat = "1234ABC";
 
         List<Reserva> lista = new ArrayList<>();
@@ -150,7 +162,7 @@ public class HistorialReservas extends JPanel {
         reservasDB.put(mat, lista);
     }
 
-    // Clase simple para no crear más archivos
+  
     private static class Reserva {
         String id, plaza, inicio, fin, estado;
         Reserva(String id, String plaza, String inicio, String fin, String estado) {
