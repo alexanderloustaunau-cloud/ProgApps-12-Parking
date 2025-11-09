@@ -75,7 +75,8 @@ public class GUI extends JFrame {
 
  parkingPanelMapa = new Parkingviewpanel(parentFrame);
 
- JPanel reservationsPanel = createReservationsPanel();
+ HistorialReservas reservasPanel = new HistorialReservas();
+
 
  JPanel profilePanel = createGenericPanel("Mi Perfil");
 
@@ -86,7 +87,7 @@ public class GUI extends JFrame {
  
  contentPanel.add(parkingPanelMapa, "MAPA");
 
- contentPanel.add(reservationsPanel, "RESERVASk"); 
+ contentPanel.add(reservasPanel, "RESERVAS");
 
  contentPanel.add(profilePanel, "MI_PERFIL");
 
@@ -189,16 +190,19 @@ public class GUI extends JFrame {
  final String nombreTarjeta = tarjetas[i]; 
 
  boton.addActionListener(new ActionListener() {
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+	        
+	    	if ("RESERVAS".equals(nombreTarjeta)) {
+	    	    
+	    	    cardLayout.show(contentPanel, "RESERVAS");
+	    	} else {
+	    	    cardLayout.show(contentPanel, nombreTarjeta);
+	    	}
 
- @Override
+	    }
+	});
 
- public void actionPerformed(ActionEvent e) {
-
- cardLayout.show(contentPanel, nombreTarjeta);
-
- }
-
- });
 
  }
 
@@ -254,29 +258,8 @@ public class GUI extends JFrame {
 
  
 
- private JPanel createReservationsPanel() {
-
- JPanel panel = new JPanel(new GridLayout(2, 1));
-
- panel.setBackground(new Color(255, 230, 230));
-
- JLabel titulo = new JLabel("Historial de Reservas", SwingConstants.CENTER);
-
- titulo.setFont(new Font("Arial", Font.BOLD, 20));
-
- panel.add(titulo);
-
- JLabel lista = new JLabel("Aquí irá la tabla de reservas pasadas y activas.", SwingConstants.CENTER);
-
- panel.add(lista);
-
- return panel;
-
- }
-
- 
-
  public static void main(String[] args) {
+	 
 
  javax.swing.SwingUtilities.invokeLater(new Runnable() {
 
