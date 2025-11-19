@@ -30,6 +30,7 @@ import javax.swing.JPanel;
 
 import javax.swing.SwingConstants;
 
+import Clases.Parking;
 
 
 
@@ -73,7 +74,6 @@ public class GUI extends JFrame {
 
  parkingsPanel = new ParkingsPanel(ParkingDataProvider.getParkings());
 
- parkingPanelMapa = new Parkingviewpanel(parentFrame);
 
  HistorialReservas reservasPanel = new HistorialReservas();
 
@@ -84,8 +84,6 @@ public class GUI extends JFrame {
 
 
  contentPanel.add(parkingsPanel, "UBICACIONES");
- 
- contentPanel.add(parkingPanelMapa, "MAPA");
 
  contentPanel.add(reservasPanel, "RESERVAS");
 
@@ -215,30 +213,33 @@ public class GUI extends JFrame {
  parkingsPanel.getBtnContinuar().addActionListener(new ActionListener() {
      @Override
      public void actionPerformed(ActionEvent e) {
-         cardLayout.show(contentPanel, "MAPA");
-     }
- });
 
- parkingsPanel.getBtnContinuar().addActionListener(new ActionListener() {
-     @Override
-     public void actionPerformed(ActionEvent e) {
-         if (parkingsPanel.getParkingSeleccionado() != null) {
-             ultimoParkingSeleccionado = parkingsPanel.getParkingSeleccionado().getNombre(); 
-         } else {
-             ultimoParkingSeleccionado = null;
+         Parking parkingSel = parkingsPanel.getParkingSeleccionado();
+         int plantaSel = parkingsPanel.getPlantaSeleccionada();
+
+         if (parkingSel == null || plantaSel < 1) {
+             JOptionPane.showMessageDialog(
+                 parentFrame,
+                 "Seleccione un parking y una planta válida.",
+                 "Selección inválida",
+                 JOptionPane.ERROR_MESSAGE
+             );
+             return;
          }
-         ultimaPlantaSeleccionada = parkingsPanel.getPlantaSeleccionada();
 
+         // 🔵 CREAR EL MAPA REALISTA CON EL NUEVO CONSTRUCTOR
+         parkingPanelMapa = new Parkingviewpanel(parentFrame, parkingSel, plantaSel);
+
+         contentPanel.add(parkingPanelMapa, "MAPA");
+
+         contentPanel.revalidate();
+         contentPanel.repaint();
          cardLayout.show(contentPanel, "MAPA");
      }
  });
 
  this.setVisible(true); 
 }
- 
-
-
-
 
  private JPanel createGenericPanel(String titulo) {
 
