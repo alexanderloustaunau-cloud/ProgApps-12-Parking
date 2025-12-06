@@ -1,6 +1,8 @@
 package MAIN;
 
 import java.awt.BorderLayout;
+import javax.swing.AbstractAction;
+
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -13,7 +15,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 
 import java.awt.Color;  // para fondos de botones
 
@@ -74,7 +78,17 @@ public class ReservationDialog extends JDialog {
         this.setSize(520, 280);
         this.setLocationRelativeTo(owner);
         this.setLayout(new BorderLayout(10, 10));
+        String actionKey = "cerrarConESC";
 
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(KeyStroke.getKeyStroke("ESCAPE"), actionKey);
+
+        getRootPane().getActionMap().put(actionKey, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();  // Cierra el diálogo
+            }
+        });
         // Campo común: plaza
         fieldPlaza = new JTextField();
         fieldPlaza.setEnabled(false);
