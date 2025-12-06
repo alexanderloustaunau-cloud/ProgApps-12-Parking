@@ -6,6 +6,8 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import javax.swing.BorderFactory;
@@ -19,41 +21,57 @@ import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableModel;
 
+import Clases.Parking;
+import Clases.Coche;
+import Clases.Reserva;
+import Clases.Planta;
+import Clases.Plaza;
+
 public class HistorialReservas extends JPanel {
 
-   
-    private final Map<String, List<Reserva>> reservasDB = new HashMap<>();
+    private static final long serialVersionUID = 1L;
 
-   
-    private final JLabel lblTitulo = new JLabel("INTRODUZCA SU MATRÍCULA:", SwingConstants.CENTER);
-    private final JLabel lblSubtitulo = new JLabel("(Ej ; 1234ABC)", SwingConstants.CENTER);
-    public final JTextField txtMatricula = new JTextField(28);
-    public final JButton btnAceptar = new JButton("Aceptar");
-    private final JButton btnVolver = new JButton("Volver");
+    // 👉 Lista de parkings reales del proyecto
+    private final List<Parking> parkings;
 
-   
+    private final JLabel lblTitulo    = new JLabel("INTRODUZCA SU MATRÍCULA:", SwingConstants.CENTER);
+    private final JLabel lblSubtitulo = new JLabel("(Ej: 1234ABC)", SwingConstants.CENTER);
+    public  final JTextField txtMatricula = new JTextField(28);
+    public  final JButton btnAceptar  = new JButton("Aceptar");
+    private final JButton btnVolver   = new JButton("Volver");
+
     private final JPanel centro = new JPanel();
 
-    public HistorialReservas() {
-        setLayout(new BorderLayout());
-        cargaEjemplo(); 
+    private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-        
+    // ------------------------------------------------------------------------
+    // CONSTRUCTORES
+    // ------------------------------------------------------------------------
+
+    // Si solo usas un parking
+    public HistorialReservas(Parking parkingUnico) {
+        this(Collections.singletonList(parkingUnico));
+    }
+
+    // Si usas varios parkings (Deusto, Leioa, San Mamés, ...)
+    public HistorialReservas(List<Parking> parkings) {
+        this.parkings = parkings;
+
+        setLayout(new BorderLayout());
+
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 30));
         lblTitulo.setBorder(BorderFactory.createEmptyBorder(100, 0, 10, 0));
         lblSubtitulo.setFont(new Font("Arial", Font.ITALIC, 16));
 
-        
         JPanel cabecera = new JPanel(new GridLayout(2, 1));
         cabecera.add(lblTitulo);
         cabecera.add(lblSubtitulo);
         add(cabecera, BorderLayout.NORTH);
 
-       
         construirFormulario();
         add(centro, BorderLayout.CENTER);
 
-       
+        // Botón ACEPTAR: busca por matrícula en TODOS los parkings
         btnAceptar.addActionListener(e -> {
             String m = txtMatricula.getText().trim().toUpperCase();
             if (m.isEmpty()) {
@@ -67,18 +85,19 @@ public class HistorialReservas extends JPanel {
             mostrarHistorial(m);
         });
 
-       
+        // Botón VOLVER
         btnVolver.addActionListener(e -> {
             lblTitulo.setText("INTRODUZCA SU MATRÍCULA:");
-            lblSubtitulo.setVisible(true); 
+            lblSubtitulo.setVisible(true);
             txtMatricula.setText("");
             construirFormulario();
             txtMatricula.requestFocus();
         });
     }
 
-  
-
+    // ------------------------------------------------------------------------
+    // FORMULARIO INICIAL
+    // ------------------------------------------------------------------------
     private void construirFormulario() {
         centro.removeAll();
         centro.setLayout(new GridLayout(2, 1, 10, 40));
@@ -101,29 +120,30 @@ public class HistorialReservas extends JPanel {
         centro.repaint();
     }
 
+    // ------------------------------------------------------------------------
+    // MOSTRAR HISTORIAL
+    // ------------------------------------------------------------------------
     private void mostrarHistorial(String matricula) {
         centro.removeAll();
         centro.setLayout(new BorderLayout());
         centro.setBorder(BorderFactory.createEmptyBorder(30, 40, 40, 40));
 
-     
         JLabel subtitulo = new JLabel("Historial de reservas para: " + matricula, SwingConstants.CENTER);
         subtitulo.setFont(new Font("Arial", Font.BOLD, 22));
         subtitulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         centro.add(subtitulo, BorderLayout.NORTH);
 
-       
-        List<Reserva> reservas = reservasDB.getOrDefault(matricula, Collections.emptyList());
-        if (reservas.isEmpty()) {
-            JLabel msg = new JLabel("No hay ninguna reserva registrada.", SwingConstants.CENTER);
+        List<FilaHistorial> filas = buscarReservasPorMatricula(matricula);
+
+        if (filas.isEmpty()) {
+            JLabel msg = new JLabel("No hay ninguna reserva registrada para esa matrícula.", SwingConstants.CENTER);
             msg.setFont(new Font("Arial", Font.PLAIN, 18));
             centro.add(msg, BorderLayout.CENTER);
         } else {
-            JTable tabla = construirTabla(reservas);
+            JTable tabla = construirTabla(filas);
             centro.add(new JScrollPane(tabla), BorderLayout.CENTER);
         }
 
-     
         JPanel pie = new JPanel(new FlowLayout(FlowLayout.CENTER));
         btnVolver.setPreferredSize(new Dimension(180, 50));
         btnVolver.setFont(new Font("Arial", Font.BOLD, 18));
@@ -135,38 +155,93 @@ public class HistorialReservas extends JPanel {
         centro.repaint();
     }
 
-    private JTable construirTabla(List<Reserva> reservas) {
+    // ------------------------------------------------------------------------
+    // ESTRUCTURA INTERNA PARA UNA FILA
+    // ------------------------------------------------------------------------
+    private static class FilaHistorial {
+        String matricula;
+        String parking;
+        String planta;
+        String plaza;
+        LocalDateTime inicio;
+        LocalDateTime fin;
+    }
+
+    // ------------------------------------------------------------------------
+    // BUSCAR TODAS LAS RESERVAS DE ESA MATRÍCULA EN TODOS LOS PARKINGS
+    // ------------------------------------------------------------------------
+    private List<FilaHistorial> buscarReservasPorMatricula(String matricula) {
+        List<FilaHistorial> resultado = new ArrayList<>();
+
+        for (Parking p : parkings) {
+            for (Coche c : p.getListaCoches()) {
+                if (!c.getMatricula().equalsIgnoreCase(matricula)) continue;
+
+                for (Reserva r : c.getReservas()) {
+                    FilaHistorial fila = new FilaHistorial();
+                    fila.matricula = c.getMatricula();
+                    fila.parking   = p.getNombre();
+
+                    Plaza plaza = r.getPlaza();
+                    String plantaStr = "-";
+                    String plazaStr  = "-";
+
+                    if (plaza != null) {
+                        for (Planta pl : p.getPlantas()) {
+                            List<Plaza> plazas = pl.getPlazas();
+                            int idx = plazas.indexOf(plaza);
+                            if (idx != -1) {
+                                plantaStr = String.valueOf(pl.getNumeroPlanta());
+                                plazaStr  = String.valueOf(plaza.getNumero());
+                                break;
+                            }
+                        }
+                    }
+
+                    fila.planta = plantaStr;
+                    fila.plaza  = plazaStr;
+                    fila.inicio = r.getFechaInicio();
+                    fila.fin    = r.getFechaFin();
+
+                    resultado.add(fila);
+                }
+            }
+        }
+
+        return resultado;
+    }
+
+    // ------------------------------------------------------------------------
+    // CONSTRUIR JTable: matricula, parking, planta, plaza, inicio, fin, estado
+    // ------------------------------------------------------------------------
+    private JTable construirTabla(List<FilaHistorial> filas) {
         DefaultTableModel modelo = new DefaultTableModel(
-            new Object[]{"ID", "Plaza", "Inicio", "Fin", "Estado"}, 0
+            new Object[]{"Matrícula", "Parking", "Planta", "Plaza", "Inicio", "Fin", "Estado"}, 0
         ) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
-        for (Reserva r : reservas) {
-            modelo.addRow(new Object[]{ r.id, r.plaza, r.inicio, r.fin, r.estado });
+
+        LocalDateTime ahora = LocalDateTime.now();
+
+        for (FilaHistorial f : filas) {
+            String ini = f.inicio.format(fmt);
+            String fin = f.fin.format(fmt);
+            String estado = f.fin.isBefore(ahora) ? "Finalizada" : "Pendiente";
+
+            modelo.addRow(new Object[]{
+                f.matricula,
+                f.parking,
+                f.planta,
+                f.plaza,
+                ini,
+                fin,
+                estado
+            });
         }
+
         JTable tabla = new JTable(modelo);
         tabla.setRowHeight(24);
+        tabla.setAutoCreateRowSorter(true); // poder ordenar por columnas
         return tabla;
-    }
-
-    
-
-    private void cargaEjemplo() {
-        
-        String mat = "1234ABC";
-
-        List<Reserva> lista = new ArrayList<>();
-        lista.add(new Reserva("R-1001", "P-12", "2025-10-02 09:00", "2025-10-02 11:30", "Finalizada"));
-        lista.add(new Reserva("R-1015", "P-07", "2025-11-08 16:15", "2025-11-08 18:00", "Finalizada"));
-
-        reservasDB.put(mat, lista);
-    }
-
-  
-    private static class Reserva {
-        String id, plaza, inicio, fin, estado;
-        Reserva(String id, String plaza, String inicio, String fin, String estado) {
-            this.id = id; this.plaza = plaza; this.inicio = inicio; this.fin = fin; this.estado = estado;
-        }
     }
 }
