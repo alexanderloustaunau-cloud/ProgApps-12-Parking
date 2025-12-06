@@ -1,13 +1,17 @@
 package Clases;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Coche {
 	private String matricula;
 	private String marca;
 	private String modelo;
-	private String color;
+	private Enum<Color> color;
+	private List<Reserva> reservas = new ArrayList<>();    
 	
 	
-	public Coche(String matricula, String marca, String modelo, String color) {
+	public Coche(String matricula, String marca, String modelo,Clases.Color color) {
 		super();
 		this.matricula = matricula;
 		this.marca = marca;
@@ -15,7 +19,15 @@ public class Coche {
 		this.color = color;
 	}
 
+	
+	public List<Reserva> getReservas() {                  
+	    return reservas;
+	}
 
+	public void addReserva(Reserva r) {                    
+	    if (r != null) reservas.add(r);
+	}
+	
 	public String getMatricula() {
 		return matricula;
 	}
@@ -46,12 +58,12 @@ public class Coche {
 	}
 
 
-	public String getColor() {
+	public Enum<Color> getColor() {
 		return color;
 	}
 
 
-	public void setColor(String color) {
+	public void setColor(Enum<Color> color) {
 		this.color = color;
 	}
 
@@ -59,6 +71,24 @@ public class Coche {
 	@Override
 	public String toString() {
 		return "Coche [matricula=" + matricula + ", marca=" + marca + ", modelo=" + modelo + ", color=" + color + "]";
+	}
+
+
+	public Object getPlazaAsignada() {
+		// TODO Auto-generated method stub.
+		return null;
+	}
+
+
+	public Object getInicioReserva() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	public Object getEstado() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 

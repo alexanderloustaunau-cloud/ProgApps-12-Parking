@@ -6,7 +6,8 @@ import java.util.List;
 public class Parking {
 	private String nombre;
 	private List<Planta> plantas;
-	private List<Coche> listacoches;
+	private List<Coche> listaCoches  = new ArrayList<>();
+	
 	public Parking(String nombre, List<Planta> plantas) {
 		super();
 		this.nombre = nombre;
@@ -30,11 +31,18 @@ public class Parking {
 		return plantas;
 	}
 	public List<Coche> getListaCoches() {
-		return listacoches;
+		return listaCoches;
 	}
 	public void setPlantas(List<Planta> plantas) {
 		this.plantas = plantas;
 	}
+	
+	public void addCoche(Coche c) {                       
+	    if (c != null && !listaCoches.contains(c)) {
+	        listaCoches.add(c);
+	    }
+	}
+	
 	public List<Plaza> getPlazasLibresTotales() {
         List<Plaza> libres = new ArrayList<>();
         for (Planta planta : plantas) {
