@@ -27,10 +27,11 @@ public class GUI extends JFrame {
     private JPanel contentPanel = new JPanel();   
 
     private final JFrame parentFrame = this; 
-
+    
     private ParkingsPanel parkingsPanel;     
     private Parkingviewpanel parkingPanelMapa; 
 
+    
     // 👉 Lista con TODOS los parkings del proyecto
     private List<Parking> parkings;
 
@@ -44,14 +45,16 @@ public class GUI extends JFrame {
 
         contentPanel.setLayout(cardLayout);
 
-        // 👉 Obtener los 3 parkings definidos en ParkingDataProvider
-        parkings = ParkingDataProvider.getParkings();
+     // 1) Obtenemos los parkings del proyecto (como tú querías)
+     parkings = ParkingDataProvider.getParkings();
 
-        // 👉 Pasar la MISMA lista al panel de ubicaciones
-        parkingsPanel = new ParkingsPanel(parkings);
+     // 2) Inicializamos datos de ejemplo sobre ESOS parkings
+     DataInitializer.inicializarDatos(parkings);
 
-        // 👉 Y también al panel de historial de reservas
-        HistorialReservas reservasPanel = new HistorialReservas(parkings);
+     // 3) Usamos esa misma lista en los paneles
+     parkingsPanel = new ParkingsPanel(parkings);
+     HistorialReservas reservasPanel = new HistorialReservas(parkings);
+
 
         JPanel profilePanel = createGenericPanel("Mi Perfil");
         JPanel helpPanel    = createGenericPanel("Ayuda");
