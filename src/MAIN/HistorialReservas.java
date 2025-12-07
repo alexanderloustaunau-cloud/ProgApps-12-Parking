@@ -48,10 +48,7 @@ public class HistorialReservas extends JPanel {
     // CONSTRUCTORES
     // ------------------------------------------------------------------------
 
-    // Si solo usas un parking
-    public HistorialReservas(Parking parkingUnico) {
-        this(Collections.singletonList(parkingUnico));
-    }
+  
 
     // Si usas varios parkings (Deusto, Leioa, San Mamés, ...)
     public HistorialReservas(List<Parking> parkings) {
@@ -211,37 +208,53 @@ public class HistorialReservas extends JPanel {
         return resultado;
     }
 
-    // ------------------------------------------------------------------------
-    // CONSTRUIR JTable: matricula, parking, planta, plaza, inicio, fin, estado
-    // ------------------------------------------------------------------------
-    private JTable construirTabla(List<FilaHistorial> filas) {
-        DefaultTableModel modelo = new DefaultTableModel(
-            new Object[]{"Matrícula", "Parking", "Planta", "Plaza", "Inicio", "Fin", "Estado"}, 0
-        ) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
+ // ------------------------------------------------------------------------
+ // CONSTRUIR JTable: matricula, parking, planta, plaza, inicio, fin, estado
+ // ------------------------------------------------------------------------
+ private JTable construirTabla(List<FilaHistorial> filas) {
+     
+     // Ordenar por fecha de inicio (más antigua → más reciente)
+     filas.sort(Comparator.comparing(f -> f.inicio));
+     
+     DefaultTableModel modelo = new DefaultTableModel(
+         new Object[]{"Matrícula", "Parking", "Planta", "Plaza", "Inicio", "Fin", "Estado"}, 0
+     ) {
+         @Override public boolean isCellEditable(int r, int c) { return false; }
+     };
 
-        LocalDateTime ahora = LocalDateTime.now();
+     LocalDateTime ahora = LocalDateTime.now();
 
-        for (FilaHistorial f : filas) {
-            String ini = f.inicio.format(fmt);
-            String fin = f.fin.format(fmt);
-            String estado = f.fin.isBefore(ahora) ? "Finalizada" : "Pendiente";
+     for (FilaHistorial f : filas) {
+         String ini = f.inicio.format(fmt);
+         String fin = f.fin.format(fmt);
 
-            modelo.addRow(new Object[]{
-                f.matricula,
-                f.parking,
-                f.planta,
-                f.plaza,
-                ini,
-                fin,
-                estado
-            });
-        }
+         String estado;
+         if (f.fin.isBefore(ahora)) {
+             // ya terminó
+             estado = "Finalizada";
+         } else if (( !f.inicio.isAfter(ahora) ) && ( !f.fin.isBefore(ahora) )) {
+             // inicio <= ahora <= fin
+             estado = "En curso";
+         } else {
+             // todavía no ha empezado
+             estado = "Pendiente";
+         }
 
-        JTable tabla = new JTable(modelo);
-        tabla.setRowHeight(24);
-        tabla.setAutoCreateRowSorter(true); // poder ordenar por columnas
-        return tabla;
-    }
+         modelo.addRow(new Object[]{
+             f.matricula,
+             f.parking,
+             f.planta,
+             f.plaza,
+             ini,
+             fin,
+             estado
+         });
+     }
+
+     JTable tabla = new JTable(modelo);
+     tabla.setRowHeight(24);
+     tabla.setAutoCreateRowSorter(true); // poder ordenar por columnas
+     return tabla;
+ }
+
 }
