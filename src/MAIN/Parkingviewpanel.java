@@ -239,13 +239,20 @@ public class Parkingviewpanel extends JPanel {
             btn.setBackground(COLOR_LIBRE);
             btn.setToolTipText("Plaza libre");
         }
-
         btn.addActionListener(e -> {
             if (plazaReal.isOcupada()) {
-                JOptionPane.showMessageDialog(parentFrame,
-                    "La plaza ya está ocupada.",
+                // Obtenemos el coche que ocupa la plaza (si lo hay)
+                Coche cocheOcupante = plazaReal.getCoche();
+                String matriculaOcupante = (cocheOcupante != null)
+                        ? cocheOcupante.getMatricula()
+                        : "desconocida";
+
+                JOptionPane.showMessageDialog(
+                    parentFrame,
+                    "La plaza ya está ocupada.\n(Matrícula: " + matriculaOcupante + ")",
                     "Plaza ocupada",
-                    JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.INFORMATION_MESSAGE
+                );
                 return;
             }
 
@@ -255,7 +262,6 @@ public class Parkingviewpanel extends JPanel {
 
             if (dialog.isReservaConfirmada()) {
 
-                // Datos del coche y de la reserva
                 String matricula     = dialog.getMatriculaSeleccionada();
                 String marca         = dialog.getMarcaSeleccionada();
                 String modelo        = dialog.getModeloSeleccionado();
@@ -263,14 +269,11 @@ public class Parkingviewpanel extends JPanel {
                 LocalDateTime inicio = dialog.getFechaInicioSeleccionada();
                 LocalDateTime fin    = dialog.getFechaFinSeleccionada();
 
-                // Buscar o crear el coche con esos datos
                 Coche coche = buscarOCrearCoche(matricula, marca, modelo, color);
 
-                // Crear la reserva y asociarla al coche
                 Reserva reserva = new Reserva(coche, plazaReal, inicio, fin);
                 coche.addReserva(reserva);
 
-                // Marcar plaza ocupada por este coche
                 plazaReal.ocupar(coche);
 
                 DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -283,6 +286,7 @@ public class Parkingviewpanel extends JPanel {
                 );
             }
         });
+
 
         return btn;
     }
