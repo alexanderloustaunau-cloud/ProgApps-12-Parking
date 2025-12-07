@@ -241,15 +241,10 @@ public class Parkingviewpanel extends JPanel {
         }
         btn.addActionListener(e -> {
             if (plazaReal.isOcupada()) {
-                // Obtenemos el coche que ocupa la plaza (si lo hay)
-                Coche cocheOcupante = plazaReal.getCoche();
-                String matriculaOcupante = (cocheOcupante != null)
-                        ? cocheOcupante.getMatricula()
-                        : "desconocida";
-
+                String mat = (plazaReal.getCoche() != null ? plazaReal.getCoche().getMatricula() : "desconocida");
                 JOptionPane.showMessageDialog(
                     parentFrame,
-                    "La plaza ya está ocupada.\n(Matrícula: " + matriculaOcupante + ")",
+                    "La plaza ya está ocupada.\n(Matrícula " + mat + ")",
                     "Plaza ocupada",
                     JOptionPane.INFORMATION_MESSAGE
                 );
@@ -262,6 +257,7 @@ public class Parkingviewpanel extends JPanel {
 
             if (dialog.isReservaConfirmada()) {
 
+                // Datos del coche y de la reserva
                 String matricula     = dialog.getMatriculaSeleccionada();
                 String marca         = dialog.getMarcaSeleccionada();
                 String modelo        = dialog.getModeloSeleccionado();
@@ -269,11 +265,27 @@ public class Parkingviewpanel extends JPanel {
                 LocalDateTime inicio = dialog.getFechaInicioSeleccionada();
                 LocalDateTime fin    = dialog.getFechaFinSeleccionada();
 
+                // Buscar o crear el coche con esos datos
                 Coche coche = buscarOCrearCoche(matricula, marca, modelo, color);
 
+                // ❗ COMPROBAR SOLAPE CON OTRAS RESERVAS DE ESTE COCHE
+                if (tieneSolape(coche, inicio, fin)) {
+                    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                    JOptionPane.showMessageDialog(
+                        parentFrame,
+                        "No se puede crear la reserva porque el coche ya tiene\n" +
+                        "otra reserva entre " + inicio.format(fmt) + " y " + fin.format(fmt) + ".",
+                        "Reserva solapada",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    return; // no creamos la reserva ni ocupamos la plaza
+                }
+
+                // Crear la reserva y asociarla al coche
                 Reserva reserva = new Reserva(coche, plazaReal, inicio, fin);
                 coche.addReserva(reserva);
 
+                // Marcar plaza ocupada por este coche
                 plazaReal.ocupar(coche);
 
                 DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -311,6 +323,22 @@ public class Parkingviewpanel extends JPanel {
         Coche nuevo = new Coche(matricula, marca, modelo, color);
         parking.addCoche(nuevo);
         return nuevo;
+    }
+    
+    private boolean tieneSolape(Coche coche, LocalDateTime nuevoInicio, LocalDateTime nuevoFin) {
+        if (coche == null || coche.getReservas() == null) return false;
+
+        for (Reserva r : coche.getReservas()) {
+            LocalDateTime ini = r.getFechaInicio();
+            LocalDateTime fin = r.getFechaFin();
+
+            // Solape si: nuevoInicio < finExistente Y nuevoFin > iniExistente
+            // (si termina exactamente cuando empieza otra, NO se considera solape)
+            if (nuevoInicio.isBefore(fin) && nuevoFin.isAfter(ini)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
