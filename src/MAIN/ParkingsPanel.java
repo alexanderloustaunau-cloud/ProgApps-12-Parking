@@ -4,9 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -24,6 +26,9 @@ public class ParkingsPanel extends JPanel {
     private final JComboBox<Integer> comboPlantas;   
     private final JLabel lblDetalle;
     private final JButton btnContinuar;
+    private JLabel labelImg1;
+    private JLabel labelImg2;
+    
 
     public ParkingsPanel(List<Parking> parkings) {
         this.parkings = parkings;
@@ -72,6 +77,7 @@ public class ParkingsPanel extends JPanel {
             public void actionPerformed(java.awt.event.ActionEvent e) {
                 recargarPlantas();                 
                 lblDetalle.setText(detalleSeleccion());
+                cargarImagenesParking();
             }
         });
 
@@ -94,11 +100,24 @@ public class ParkingsPanel extends JPanel {
         arriba.add(comboPlantas, BorderLayout.SOUTH);
 
         centro.add(arriba, BorderLayout.NORTH);
-        centro.add(lblDetalle, BorderLayout.CENTER);
-        centro.add(btnContinuar, BorderLayout.SOUTH);
+        JPanel panelCentroContenido = new JPanel(new BorderLayout());
+        panelCentroContenido.setOpaque(false);
+        JPanel panelImagenes = new JPanel(new GridLayout(1, 2, 10, 10));
+        panelImagenes.setOpaque(false);
+        labelImg1 = new JLabel();
+        labelImg1.setHorizontalAlignment(SwingConstants.CENTER);
 
+        labelImg2 = new JLabel();
+        labelImg2.setHorizontalAlignment(SwingConstants.CENTER);
+        panelImagenes.add(labelImg1);
+        panelImagenes.add(labelImg2);
+        panelCentroContenido.add(panelImagenes, BorderLayout.CENTER);
+        panelCentroContenido.add(lblDetalle, BorderLayout.SOUTH);
+        centro.add(btnContinuar, BorderLayout.SOUTH);
+        centro.add(panelCentroContenido, BorderLayout.CENTER);
         this.add(titulo, BorderLayout.NORTH);
         this.add(centro, BorderLayout.CENTER);
+        cargarImagenesParking();
     }
 
     public Parking getParkingSeleccionado() {
@@ -147,4 +166,17 @@ public class ParkingsPanel extends JPanel {
         String plantaTxt = getPlantaSeleccionada() > 0 ? (" | Planta: " + getPlantaSeleccionada()) : "";
         return "Seleccionado: " + sel.getNombre() + "  |  Nº de plantas: " + numPlantas + plantaTxt;
     }
-}
+    private void cargarImagenesParking() {
+    	Parking p = getParkingSeleccionado();
+    	if(p == null ) {
+    		return;
+    	}
+    	try {
+            labelImg1.setIcon(new ImageIcon(getClass().getResource(p.getImagen1())));
+            labelImg2.setIcon(new ImageIcon(getClass().getResource(p.getImagen2())));
+        } catch (Exception e) {
+            System.err.println("No se han podido cargar imágenes del parking " + p.getNombre());
+        }
+    }
+    }
+

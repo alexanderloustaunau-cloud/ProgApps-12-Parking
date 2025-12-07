@@ -7,6 +7,9 @@ public class Parking {
 	private String nombre;
 	private List<Planta> plantas;
 	private List<Coche> listaCoches  = new ArrayList<>();
+	private String Imagen1;
+	private String Imagen2;
+	
 	
 	public Parking(String nombre, List<Planta> plantas) {
 		super();
@@ -33,9 +36,21 @@ public class Parking {
 	public List<Coche> getListaCoches() {
 		return listaCoches;
 	}
+	public String getImagen1() { 
+		return Imagen1; 
+		}
+	
+	public String getImagen2() { 
+	return Imagen2; 
+	}
 	public void setPlantas(List<Planta> plantas) {
 		this.plantas = plantas;
 	}
+	
+	public void setImagen1(String rutaImagen1) { 
+		this.Imagen1 = rutaImagen1; }
+	public void setImagen2(String rutaImagen2) { 
+		this.Imagen2 = rutaImagen2; }
 	
 	public void addCoche(Coche c) {                       
 	    if (c != null && !listaCoches.contains(c)) {
