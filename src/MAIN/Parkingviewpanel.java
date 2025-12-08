@@ -8,6 +8,8 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -27,17 +29,19 @@ public class Parkingviewpanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
+    
     private final Color COLOR_LIBRE   = new Color(76, 175, 80);
     private final Color COLOR_OCUPADO = new Color(244, 67, 54);
+    private final Color COLOR_FUTURA  = new Color(33, 150, 243);
+    private final Color COLOR_SIM     = new Color(244, 67, 54);
 
     private JFrame parentFrame;
-
     private Parking parking;
     private int planta;
 
-    // ------------------------------------------------------------------------
-    // CONSTRUCTOR
-    // ------------------------------------------------------------------------
+    // Mapa número plaza → botón
+    private Map<Integer, JButton> botonesPlaza = new HashMap<>();
+
     public Parkingviewpanel(JFrame owner, Parking parking, int planta) {
         this.parentFrame = owner;
         this.parking = parking;
@@ -47,13 +51,11 @@ public class Parkingviewpanel extends JPanel {
         this.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         construirMapa();
+        refreshEstadoPlazas();
     }
 
-    // ------------------------------------------------------------------------
-    // MAPA COMPLETO (usa GridBagLayout)
-    // ------------------------------------------------------------------------
+    
     private void construirMapa() {
-
         this.removeAll();
         this.setLayout(new GridBagLayout());
 
@@ -64,17 +66,13 @@ public class Parkingviewpanel extends JPanel {
         construirColumnas3();
         construirRampasJuntas(esPlanta1);
 
-        if (esPlanta1) {
-            construirEntradaSalida();
-        }
+        if (esPlanta1) construirEntradaSalida();
 
         revalidate();
         repaint();
     }
 
-    // ------------------------------------------------------------------------
-    // AÑADIR PLAZA EN COORDENADA
-    // ------------------------------------------------------------------------
+   
     private void addPlaza(int num, int row, int col) {
         JButton btn = crearBotonPlaza(num);
 
@@ -83,12 +81,11 @@ public class Parkingviewpanel extends JPanel {
         gbc.gridy = row;
         gbc.insets = new Insets(3, 3, 3, 3);
 
+        botonesPlaza.put(num, btn);
         this.add(btn, gbc);
     }
 
-    // ------------------------------------------------------------------------
-    // AÑADIR BLOQUE (columna física)
-    // ------------------------------------------------------------------------
+
     private void addBloque(int row, int col) {
         JPanel bloque = new JPanel();
         bloque.setBackground(new Color(80, 80, 80));
@@ -102,9 +99,7 @@ public class Parkingviewpanel extends JPanel {
         this.add(bloque, gbc);
     }
 
-    // ------------------------------------------------------------------------
-    // ENTRADA / SALIDA (solo en planta 1)
-    // ------------------------------------------------------------------------
+    
     private void construirEntradaSalida() {
 
         JLabel entrada = new JLabel("ENTRADA →", SwingConstants.CENTER);
@@ -119,21 +114,17 @@ public class Parkingviewpanel extends JPanel {
 
         GridBagConstraints gbc = new GridBagConstraints();
 
-        // ENTRADA
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.insets = new Insets(3, 3, 3, 3);
         this.add(entrada, gbc);
 
-        // SALIDA
         gbc.gridx = 17;
         gbc.gridy = 0;
         this.add(salida, gbc);
     }
 
-    // ------------------------------------------------------------------------
-    // RAMPAS JUNTAS (2 celdas)
-    // ------------------------------------------------------------------------
+    
     private void construirRampasJuntas(boolean esPlanta1) {
 
         JLabel rmpDown = new JLabel("RAMPA ↓", SwingConstants.CENTER);
@@ -148,80 +139,56 @@ public class Parkingviewpanel extends JPanel {
 
         GridBagConstraints gbc = new GridBagConstraints();
 
-        // ↓ BAJADA
         gbc.gridx = 16;
         gbc.gridy = 15;
         gbc.insets = new Insets(3, 3, 3, 3);
         this.add(rmpDown, gbc);
 
-        // ↑ SUBIDA
         gbc.gridx = 17;
         gbc.gridy = 15;
         this.add(rmpUp, gbc);
     }
 
-    // ------------------------------------------------------------------------
-    // LATERALES DEL PARKING (1–15, 16–30, 61–75, 76–90)
-    // ------------------------------------------------------------------------
+   
     private void construirLaterales() {
 
-        // Superior 1–15
         for (int i = 0; i < 15; i++) {
             addPlaza(1 + i, 0, 1 + i);
         }
-
-        // Derecha 16–30
         for (int i = 0; i < 15; i++) {
             addPlaza(16 + i, 1 + i, 17);
         }
-
-        // Izquierda 61–75
         for (int i = 0; i < 15; i++) {
             addPlaza(61 + i, 1 + i, 0);
         }
-
-        // Inferior 76–90
         for (int i = 0; i < 15; i++) {
             addPlaza(76 + i, 15, 1 + i);
         }
     }
 
-    // ------------------------------------------------------------------------
-    // TRES ISLETAS INTERIORES (31–40 / 41–50 / 51–60)
-    // ------------------------------------------------------------------------
+    
     private void construirIsletas3() {
 
-        // Isleta 1 (izquierda) 31–40
         for (int i = 0; i < 10; i++) {
             addPlaza(31 + i, 3 + i, 4);
         }
 
-        // Isleta 2 (centro) 41–50
         for (int i = 0; i < 10; i++) {
             addPlaza(41 + i, 3 + i, 9);
         }
 
-        // Isleta 3 (derecha) 51–60
         for (int i = 0; i < 10; i++) {
             addPlaza(51 + i, 3 + i, 14);
         }
     }
 
-    // ------------------------------------------------------------------------
-    // COLUMNAS FÍSICAS
-    // ------------------------------------------------------------------------
+  
     private void construirColumnas3() {
-
-        // Columna izquierda inferior
         addBloque(12, 4);
-
-        // Columna derecha inferior
         addBloque(12, 14);
     }
 
-    // ------------------------------------------------------------------------
-    // BOTÓN DE PLAZA (pinta estado y gestiona reserva)
-    // ------------------------------------------------------------------------
+    
     private JButton crearBotonPlaza(int num) {
 
         Planta plantaObj = parking.getPlantas().get(planta - 1);
@@ -232,113 +199,183 @@ public class Parkingviewpanel extends JPanel {
         btn.setForeground(Color.WHITE);
         btn.setPreferredSize(new Dimension(45, 35));
 
-        if (plazaReal.isOcupada()) {
-            btn.setBackground(COLOR_OCUPADO);
-            btn.setToolTipText("Plaza ocupada");
-        } else {
-            btn.setBackground(COLOR_LIBRE);
-            btn.setToolTipText("Plaza libre");
-        }
-        btn.addActionListener(e -> {
-            if (plazaReal.isOcupada()) {
-                String mat = (plazaReal.getCoche() != null ? plazaReal.getCoche().getMatricula() : "desconocida");
-                JOptionPane.showMessageDialog(
-                    parentFrame,
-                    "La plaza ya está ocupada.\n(Matrícula " + mat + ")",
-                    "Plaza ocupada",
-                    JOptionPane.INFORMATION_MESSAGE
-                );
-                return;
-            }
-
-            ReservationDialog dialog = new ReservationDialog(parentFrame, "LIBRE");
-            dialog.setPlaza("P" + num);
-            dialog.setVisible(true);
-
-            if (dialog.isReservaConfirmada()) {
-
-                // Datos del coche y de la reserva
-                String matricula     = dialog.getMatriculaSeleccionada();
-                String marca         = dialog.getMarcaSeleccionada();
-                String modelo        = dialog.getModeloSeleccionado();
-                Clases.Color color   = dialog.getColorSeleccionado();
-                LocalDateTime inicio = dialog.getFechaInicioSeleccionada();
-                LocalDateTime fin    = dialog.getFechaFinSeleccionada();
-
-                // Buscar o crear el coche con esos datos
-                Coche coche = buscarOCrearCoche(matricula, marca, modelo, color);
-
-                // ❗ COMPROBAR SOLAPE CON OTRAS RESERVAS DE ESTE COCHE
-                if (tieneSolape(coche, inicio, fin)) {
-                    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-                    JOptionPane.showMessageDialog(
-                        parentFrame,
-                        "No se puede crear la reserva porque el coche ya tiene\n" +
-                        "otra reserva entre " + inicio.format(fmt) + " y " + fin.format(fmt) + ".",
-                        "Reserva solapada",
-                        JOptionPane.ERROR_MESSAGE
-                    );
-                    return; // no creamos la reserva ni ocupamos la plaza
-                }
-
-                // Crear la reserva y asociarla al coche
-                Reserva reserva = new Reserva(coche, plazaReal, inicio, fin);
-                coche.addReserva(reserva);
-
-                // Marcar plaza ocupada por este coche
-                plazaReal.ocupar(coche);
-
-                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-                btn.setBackground(COLOR_OCUPADO);
-                btn.setToolTipText(
-                    "<html>Plaza ocupada<br>" +
-                    "Coche: " + marca + " " + modelo + "<br>" +
-                    inicio.format(fmt) + " - " + fin.format(fmt) +
-                    "</html>"
-                );
-            }
-        });
-
+        btn.addActionListener(e -> gestionarClick(plazaReal, btn));
 
         return btn;
     }
 
-    // ------------------------------------------------------------------------
-    // Buscar o crear coche en el parking
-    // ------------------------------------------------------------------------
-    private Coche buscarOCrearCoche(String matricula, String marca, String modelo, Clases.Color color) {
-        for (Coche c : parking.getListaCoches()) {
-            if (c.getMatricula().equalsIgnoreCase(matricula)) {
+ 
+    private void gestionarClick(Plaza plazaReal, JButton btn) {
 
-                // Opcional: actualizar datos si estaban genéricos
-                if (c.getMarca() == null || c.getMarca().isBlank()) c.setMarca(marca);
-                if (c.getModelo() == null || c.getModelo().isBlank()) c.setModelo(modelo);
-                if (c.getColor() == null && color != null) c.setColor(color);
+        EstadoPlaza estado = calcularEstado(plazaReal);
 
-                return c;
-            }
+        switch (estado) {
+            case OCUPADA_REAL:
+                JOptionPane.showMessageDialog(
+                    parentFrame,
+                    "La plaza está ocupada REALMENTE.\nCoche: " +
+                    plazaReal.getCoche().getMatricula(),
+                    "Plaza ocupada",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                return;
+
+            case FUTURA:
+                JOptionPane.showMessageDialog(
+                    parentFrame,
+                    "La plaza tiene una RESERVA FUTURA y no puede ser usada.",
+                    "Reserva futura",
+                    JOptionPane.WARNING_MESSAGE
+                );
+                return;
+
+            case OCUPADA_SIM:
+                JOptionPane.showMessageDialog(
+                    parentFrame,
+                    "La plaza está ocupada por el SIMULADOR.",
+                    "Ocupada (Simulada)",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                return;
+
+            case LIBRE:
+                abrirDialogoReserva(plazaReal, btn);
+                return;
+        }
+    }
+
+   
+    private void abrirDialogoReserva(Plaza plazaReal, JButton btn) {
+
+        ReservationDialog dialog = new ReservationDialog(parentFrame, "LIBRE");
+        dialog.setPlaza("P" + plazaReal.getNumero());
+        dialog.setVisible(true);
+
+        if (!dialog.isReservaConfirmada()) return;
+
+        Coche coche = buscarOCrearCoche(
+                dialog.getMatriculaSeleccionada(),
+                dialog.getMarcaSeleccionada(),
+                dialog.getModeloSeleccionado(),
+                dialog.getColorSeleccionado()
+        );
+
+        Reserva reserva = new Reserva(
+                coche,
+                plazaReal,
+                dialog.getFechaInicioSeleccionada(),
+                dialog.getFechaFinSeleccionada()
+        );
+
+        coche.addReserva(reserva);
+
+        // Si ya está en curso → ocupar plaza
+        if (!reserva.getFechaInicio().isAfter(LocalDateTime.now())) {
+            plazaReal.ocupar(coche);
         }
 
-        // Si no existe, lo creamos con los datos proporcionados
+        refreshEstadoPlazas();
+    }
+
+    
+    private Coche buscarOCrearCoche(String matricula, String marca, String modelo, Clases.Color color) {
+
+        for (Coche c : parking.getListaCoches()) {
+            if (c.getMatricula().equalsIgnoreCase(matricula)) return c;
+        }
+
         Coche nuevo = new Coche(matricula, marca, modelo, color);
         parking.addCoche(nuevo);
         return nuevo;
     }
-    
-    private boolean tieneSolape(Coche coche, LocalDateTime nuevoInicio, LocalDateTime nuevoFin) {
-        if (coche == null || coche.getReservas() == null) return false;
 
-        for (Reserva r : coche.getReservas()) {
-            LocalDateTime ini = r.getFechaInicio();
-            LocalDateTime fin = r.getFechaFin();
-
-            // Solape si: nuevoInicio < finExistente Y nuevoFin > iniExistente
-            // (si termina exactamente cuando empieza otra, NO se considera solape)
-            if (nuevoInicio.isBefore(fin) && nuevoFin.isAfter(ini)) {
-                return true;
-            }
-        }
-        return false;
+   
+    private enum EstadoPlaza {
+        LIBRE,
+        OCUPADA_REAL,
+        FUTURA,
+        OCUPADA_SIM
     }
 
+   
+    private EstadoPlaza calcularEstado(Plaza p) {
+
+        if (p.isOcupada()) return EstadoPlaza.OCUPADA_REAL;
+
+        for (Coche c : parking.getListaCoches()) {
+            for (Reserva r : c.getReservas()) {
+                if (r.getPlaza() == p) {
+
+                    LocalDateTime ahora = LocalDateTime.now();
+
+                    if (r.getFechaInicio().isAfter(ahora)) {
+                        return EstadoPlaza.FUTURA;
+                    }
+                    if (r.getFechaInicio().isBefore(ahora) &&
+                        r.getFechaFin().isAfter(ahora)) {
+                        return EstadoPlaza.OCUPADA_REAL;
+                    }
+                }
+            }
+        }
+
+        return EstadoPlaza.LIBRE;
+    }
+
+ 
+    public void refreshEstadoPlazas() {
+
+        Planta plantaObj = parking.getPlantas().get(planta - 1);
+
+        for (Plaza p : plantaObj.getPlazas()) {
+
+            JButton btn = botonesPlaza.get(p.getNumero());
+            if (btn == null) continue;
+
+            EstadoPlaza estado = calcularEstado(p);
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+            switch (estado) {
+
+                case LIBRE:
+                    btn.setBackground(COLOR_LIBRE);
+                    btn.setToolTipText("Plaza libre");
+                    break;
+
+                case FUTURA:
+                    btn.setBackground(COLOR_FUTURA);
+                    Reserva futura = obtenerReservaDePlaza(p);
+                    btn.setToolTipText("<html>Reserva futura<br>"
+                            + futura.getFechaInicio().format(fmt)
+                            + " - "
+                            + futura.getFechaFin().format(fmt)
+                            + "</html>");
+                    break;
+
+                case OCUPADA_REAL:
+                    btn.setBackground(COLOR_OCUPADO);
+                    Coche c = p.getCoche();
+                    btn.setToolTipText("<html>Ocupada<br>"
+                            + c.getMarca() + " " + c.getModelo()
+                            + "<br>" + c.getMatricula() + "</html>");
+                    break;
+
+                case OCUPADA_SIM:
+                    btn.setBackground(COLOR_SIM);
+                    btn.setToolTipText("Ocupada (Simulada)");
+                    break;
+            }
+        }
+
+        repaint();
+    }
+
+    private Reserva obtenerReservaDePlaza(Plaza p) {
+        for (Coche c : parking.getListaCoches()) {
+            for (Reserva r : c.getReservas()) {
+                if (r.getPlaza() == p) return r;
+            }
+        }
+        return null;
+    }
 }

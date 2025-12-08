@@ -145,10 +145,19 @@ public class GUI extends JFrame {
                 // Crear el mapa de esa planta en el parking seleccionado
                 parkingPanelMapa = new Parkingviewpanel(parentFrame, parkingSel, plantaSel);
 
-                contentPanel.add(parkingPanelMapa, "MAPA");
-                contentPanel.revalidate();
-                contentPanel.repaint();
-                cardLayout.show(contentPanel, "MAPA");
+             // Lanzar el hilo que mantiene la planta actualizada
+             ParkingUpdaterThread updater = new ParkingUpdaterThread(
+                     parkingSel,
+                     plantaSel,
+                     parkingPanelMapa
+             );
+             updater.start();
+
+             contentPanel.add(parkingPanelMapa, "MAPA");
+             contentPanel.revalidate();
+             contentPanel.repaint();
+             cardLayout.show(contentPanel, "MAPA");
+
             }
         });
 
