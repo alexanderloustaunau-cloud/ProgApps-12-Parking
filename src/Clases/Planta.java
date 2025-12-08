@@ -1,6 +1,7 @@
 package Clases;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class Planta {
@@ -19,4 +20,15 @@ public class Planta {
 
     public int getNumeroPlanta() { return numeroPlanta; }
     public List<Plaza> getPlazas() { return plazas; }
+
+	public Collection<? extends Plaza> getPlazasLibres() {
+		// TODO Auto-generated method stub
+		List<Plaza> libres = new ArrayList<>();
+		for (Plaza plaza : plazas) {
+			if (!plaza.isOcupada()) {
+				libres.add(plaza);
+			}
+		}
+		return libres;
+	}
 }
