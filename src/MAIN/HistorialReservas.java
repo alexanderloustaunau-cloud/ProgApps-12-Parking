@@ -30,6 +30,7 @@ import Clases.Plaza;
 public class HistorialReservas extends JPanel {
 
     private static final long serialVersionUID = 1L;
+    private final JPanel cabecera = new JPanel();
 
     // 👉 Lista de parkings reales del proyecto
     private final List<Parking> parkings;
@@ -57,18 +58,21 @@ public class HistorialReservas extends JPanel {
         setLayout(new BorderLayout());
 
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 30));
-        lblTitulo.setBorder(BorderFactory.createEmptyBorder(100, 0, 10, 0));
-        lblSubtitulo.setFont(new Font("Arial", Font.ITALIC, 16));
+     // menos margen arriba y algo de margen lateral para centrar respecto al campo
+     lblTitulo.setBorder(BorderFactory.createEmptyBorder(30, 200, 5, 200));
 
-        JPanel cabecera = new JPanel(new GridLayout(2, 1));
-        cabecera.add(lblTitulo);
-        cabecera.add(lblSubtitulo);
-        add(cabecera, BorderLayout.NORTH);
+     lblSubtitulo.setFont(new Font("Arial", Font.ITALIC, 16));
+     lblSubtitulo.setBorder(BorderFactory.createEmptyBorder(0, 200, 15, 200));
+
+     
+     cabecera.setLayout(new GridLayout(2, 1));
+     cabecera.add(lblTitulo);
+     cabecera.add(lblSubtitulo);
+     add(cabecera, BorderLayout.NORTH);
 
         construirFormulario();
         add(centro, BorderLayout.CENTER);
 
-        // Botón ACEPTAR: busca por matrícula en TODOS los parkings
         btnAceptar.addActionListener(e -> {
             String m = txtMatricula.getText().trim().toUpperCase();
             if (m.isEmpty()) {
@@ -78,17 +82,24 @@ public class HistorialReservas extends JPanel {
                 return;
             }
             lblTitulo.setText("MATRÍCULA INTRODUCIDA: " + m);
-            lblSubtitulo.setVisible(false);
+            lblSubtitulo.setVisible(false);           // puedes incluso quitarlo de la cabecera:
+            // cabecera.remove(lblSubtitulo);
+            cabecera.revalidate();
+            cabecera.repaint();
+
             mostrarHistorial(m);
         });
-
-        // Botón VOLVER
+        
         btnVolver.addActionListener(e -> {
             lblTitulo.setText("INTRODUZCA SU MATRÍCULA:");
             lblSubtitulo.setVisible(true);
             txtMatricula.setText("");
-            construirFormulario();
+
+            construirFormulario();     // volvemos a poner el formulario en 'centro'
             txtMatricula.requestFocus();
+
+            cabecera.revalidate();
+            cabecera.repaint();
         });
     }
 
@@ -97,60 +108,65 @@ public class HistorialReservas extends JPanel {
     // ------------------------------------------------------------------------
     private void construirFormulario() {
         centro.removeAll();
-        centro.setLayout(new GridLayout(2, 1, 10, 40));
-        centro.setBorder(BorderFactory.createEmptyBorder(50, 60, 60, 60));
 
-        JPanel filaCampo = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        txtMatricula.setPreferredSize(new Dimension(220, 50));
+        // Panel vertical: campo arriba, botón más abajo
+        centro.setLayout(new BorderLayout());
+        centro.setBorder(BorderFactory.createEmptyBorder(10, 200, 40, 200));
+
+        // Panel del campo de matrícula (arriba)
+        JPanel filaCampo = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 10));
+        txtMatricula.setPreferredSize(new Dimension(500, 50));
         txtMatricula.setFont(new Font("Arial", Font.PLAIN, 20));
         filaCampo.add(txtMatricula);
-        centro.add(filaCampo);
+        centro.add(filaCampo, BorderLayout.NORTH);
 
-        JPanel filaBoton = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        btnAceptar.setPreferredSize(new Dimension(200, 60));
+        // Panel del botón (debajo)
+        JPanel filaBoton = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 30));
+        btnAceptar.setPreferredSize(new Dimension(220, 60));
         btnAceptar.setFont(new Font("Arial", Font.BOLD, 22));
         btnAceptar.setBackground(new Color(120, 230, 140));
         filaBoton.add(btnAceptar);
-        centro.add(filaBoton);
+        centro.add(filaBoton, BorderLayout.CENTER);
 
         centro.revalidate();
         centro.repaint();
     }
 
-    // ------------------------------------------------------------------------
-    // MOSTRAR HISTORIAL
-    // ------------------------------------------------------------------------
-    private void mostrarHistorial(String matricula) {
-        centro.removeAll();
-        centro.setLayout(new BorderLayout());
-        centro.setBorder(BorderFactory.createEmptyBorder(30, 40, 40, 40));
 
-        JLabel subtitulo = new JLabel("Historial de reservas para: " + matricula, SwingConstants.CENTER);
-        subtitulo.setFont(new Font("Arial", Font.BOLD, 22));
-        subtitulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        centro.add(subtitulo, BorderLayout.NORTH);
+ // ------------------------------------------------------------------------
+ // MOSTRAR HISTORIAL
+ // ------------------------------------------------------------------------
+ private void mostrarHistorial(String matricula) {
+     centro.removeAll();
+     // Menos margen para que la tabla ocupe más
+     centro.setLayout(new BorderLayout());
+     centro.setBorder(BorderFactory.createEmptyBorder(10, 40, 20, 40));
 
-        List<FilaHistorial> filas = buscarReservasPorMatricula(matricula);
+     List<FilaHistorial> filas = buscarReservasPorMatricula(matricula);
 
-        if (filas.isEmpty()) {
-            JLabel msg = new JLabel("No hay ninguna reserva registrada para esa matrícula.", SwingConstants.CENTER);
-            msg.setFont(new Font("Arial", Font.PLAIN, 18));
-            centro.add(msg, BorderLayout.CENTER);
-        } else {
-            JTable tabla = construirTabla(filas);
-            centro.add(new JScrollPane(tabla), BorderLayout.CENTER);
-        }
+     if (filas.isEmpty()) {
+         JLabel msg = new JLabel("No hay ninguna reserva registrada para esa matrícula.", SwingConstants.CENTER);
+         msg.setFont(new Font("Arial", Font.PLAIN, 18));
+         centro.add(msg, BorderLayout.CENTER);
+     } else {
+         JTable tabla = construirTabla(filas);
+         JScrollPane scroll = new JScrollPane(tabla);
+         // BorderLayout.CENTER hace que el scroll (y la tabla) ocupen casi todo el espacio
+         centro.add(scroll, BorderLayout.CENTER);
+     }
 
-        JPanel pie = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        btnVolver.setPreferredSize(new Dimension(180, 50));
-        btnVolver.setFont(new Font("Arial", Font.BOLD, 18));
-        btnVolver.setBackground(new Color(255, 105, 97));
-        pie.add(btnVolver);
-        centro.add(pie, BorderLayout.SOUTH);
+     // Pie con el botón Volver
+     JPanel pie = new JPanel(new FlowLayout(FlowLayout.CENTER));
+     btnVolver.setPreferredSize(new Dimension(180, 50));
+     btnVolver.setFont(new Font("Arial", Font.BOLD, 18));
+     btnVolver.setBackground(new Color(255, 105, 97));
+     pie.add(btnVolver);
+     centro.add(pie, BorderLayout.SOUTH);
 
-        centro.revalidate();
-        centro.repaint();
-    }
+     centro.revalidate();
+     centro.repaint();
+ }
+
 
     // ------------------------------------------------------------------------
     // ESTRUCTURA INTERNA PARA UNA FILA
@@ -211,50 +227,77 @@ public class HistorialReservas extends JPanel {
  // ------------------------------------------------------------------------
  // CONSTRUIR JTable: matricula, parking, planta, plaza, inicio, fin, estado
  // ------------------------------------------------------------------------
- private JTable construirTabla(List<FilaHistorial> filas) {
-     
-     // Ordenar por fecha de inicio (más antigua → más reciente)
-     filas.sort(Comparator.comparing(f -> f.inicio));
-     
-     DefaultTableModel modelo = new DefaultTableModel(
-         new Object[]{"Matrícula", "Parking", "Planta", "Plaza", "Inicio", "Fin", "Estado"}, 0
-     ) {
-         @Override public boolean isCellEditable(int r, int c) { return false; }
-     };
+    private JTable construirTabla(List<FilaHistorial> filas) {
+        filas.sort(Comparator.comparing(f -> f.inicio));
 
-     LocalDateTime ahora = LocalDateTime.now();
+        DefaultTableModel modelo = new DefaultTableModel(
+            new Object[]{"Matrícula", "Parking", "Planta", "Plaza", "Inicio", "Fin", "Estado"}, 0
+        ) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
 
-     for (FilaHistorial f : filas) {
-         String ini = f.inicio.format(fmt);
-         String fin = f.fin.format(fmt);
+        LocalDateTime ahora = LocalDateTime.now();
+        for (FilaHistorial f : filas) {
+            String ini = f.inicio.format(fmt);
+            String fin = f.fin.format(fmt);
 
-         String estado;
-         if (f.fin.isBefore(ahora)) {
-             // ya terminó
-             estado = "Finalizada";
-         } else if (( !f.inicio.isAfter(ahora) ) && ( !f.fin.isBefore(ahora) )) {
-             // inicio <= ahora <= fin
-             estado = "En curso";
-         } else {
-             // todavía no ha empezado
-             estado = "Pendiente";
-         }
+            String estado;
+            if (f.fin.isBefore(ahora)) {
+                estado = "Finalizada";
+            } else if ((f.inicio.isBefore(ahora) || f.inicio.isEqual(ahora)) && f.fin.isAfter(ahora)) {
+                estado = "En curso";
+            } else {
+                estado = "Pendiente";
+            }
 
-         modelo.addRow(new Object[]{
-             f.matricula,
-             f.parking,
-             f.planta,
-             f.plaza,
-             ini,
-             fin,
-             estado
-         });
-     }
+            modelo.addRow(new Object[]{
+                f.matricula, f.parking, f.planta, f.plaza, ini, fin, estado
+            });
+        }
 
-     JTable tabla = new JTable(modelo);
-     tabla.setRowHeight(24);
-     tabla.setAutoCreateRowSorter(true); // poder ordenar por columnas
-     return tabla;
- }
+        JTable tabla = new JTable(modelo) {
+            @Override
+            public java.awt.Component prepareRenderer(
+                    javax.swing.table.TableCellRenderer renderer,
+                    int row, int column) {
+
+                java.awt.Component c = super.prepareRenderer(renderer, row, column);
+
+                if (isRowSelected(row)) {
+                    c.setBackground(getSelectionBackground());
+                    c.setForeground(getSelectionForeground());
+                    return c;
+                }
+
+                int modelRow = convertRowIndexToModel(row);
+                String estado = (String) getModel().getValueAt(modelRow, 6);
+
+                if ("Finalizada".equalsIgnoreCase(estado)) {
+                    c.setBackground(new Color(255, 200, 200));
+                } else if ("En curso".equalsIgnoreCase(estado)) {
+                    c.setBackground(new Color(200, 255, 200));
+                } else if ("Pendiente".equalsIgnoreCase(estado)) {
+                    c.setBackground(new Color(200, 220, 255));
+                } else {
+                    c.setBackground(Color.WHITE);
+                }
+                c.setForeground(Color.BLACK);
+
+                return c;
+            }
+        };
+
+        // 🔠 Fuente más grande para el contenido
+        tabla.setFont(new Font("Arial", Font.PLAIN, 16));
+        tabla.setRowHeight(28);
+
+        // 🔠 Header en negrita y más grande
+        tabla.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
+
+        tabla.setAutoCreateRowSorter(true);
+        return tabla;
+    }
+
+
 
 }
