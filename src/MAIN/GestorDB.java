@@ -21,6 +21,8 @@ public class GestorDB {
     public GestorDB() {
         try {
             Class.forName("org.sqlite.JDBC");
+            java.io.File dbFile = new java.io.File("resources/db/parking.db");
+            System.out.println("Ruta absoluta BD: " + dbFile.getAbsolutePath());
         } catch (ClassNotFoundException e) {
             System.err.format("* Error al cargar el driver de la BBDD: %s\n", e.getMessage());
         }
