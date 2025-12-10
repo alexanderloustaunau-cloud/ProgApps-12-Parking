@@ -39,7 +39,7 @@ public class IniciarDatos {
 
         // 2) Crear hasta X reservas 
         
-        int reservasObjetivo = 2500; //X
+        int reservasObjetivo = 1000; //X
         int reservasCreadas  = 0;
 
         while (reservasCreadas < reservasObjetivo) {
