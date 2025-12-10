@@ -4,6 +4,7 @@ public class Plaza {
 private int numero;
 private boolean ocupada;
 private Coche coche;
+private int idBD = -1;
 
 
 
@@ -31,6 +32,13 @@ public Coche getCoche() {
 public void setCoche(Coche coche) {
 	this.coche = coche;
 }
+public int getIdBD() {
+    return idBD;
+}
+
+public void setIdBD(int idBD) {
+    this.idBD = idBD;
+}
 @Override
 public String toString() {
 	return "Plaza [numero=" + numero + ", ocupada=" + ocupada + ", coche=" + coche + "]";
@@ -43,7 +51,6 @@ public void liberar() {
 	this.coche = null;
 	this.ocupada=false;
 }
-
 
 }
 

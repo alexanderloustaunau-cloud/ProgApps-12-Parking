@@ -23,7 +23,7 @@ public class ParkingUpdaterThread extends Thread {
     private int planta;
     private boolean running = true;
 
-    private int intervaloMs = 3000; // cada 3 segundos
+    private int intervaloMs = 3000; 
 
     public ParkingUpdaterThread(Parking parking, int planta, Parkingviewpanel panel) {
         this.parking = parking;
@@ -63,26 +63,26 @@ public class ParkingUpdaterThread extends Thread {
                 boolean debeOcuparse = false;
                 boolean debeLiberarse = false;
 
-                // Buscar reservas válidas sobre esta plaza
+               
                 for (Coche c : parking.getListaCoches()) {
                     for (Reserva r : c.getReservas()) {
                         if (r.getPlaza() != plaza) continue;
 
-                        // Caso 1 → RESERVA ACTIVA (inicio ≤ ahora ≤ fin)
+                       
                         if (!r.getFechaInicio().isAfter(ahora) &&
                              r.getFechaFin().isAfter(ahora)) {
                             debeOcuparse = true;
                             cocheActual = c;
                         }
 
-                        // Caso 2 → YA TERMINÓ
+                        
                         if (r.getFechaFin().isBefore(ahora)) {
                             debeLiberarse = true;
                         }
                     }
                 }
 
-                // Aplicar cambios reales de ocupación
+                
                 if (debeLiberarse) plaza.liberar();
                 if (debeOcuparse) plaza.ocupar(cocheActual);
             }

@@ -24,9 +24,7 @@ import java.awt.Color;  // para fondos de botones
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-// OJO: tu enum de colores está en Clases.Color
-// No lo importo para evitar conflicto con java.awt.Color
-// Lo usaré como Clases.Color en el código.
+
 
 public class ReservationDialog extends JDialog {
 
@@ -35,20 +33,20 @@ public class ReservationDialog extends JDialog {
     private static final DateTimeFormatter FORMATO_FECHA =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    // Paso 0: plaza
+    //  plaza
     private JTextField fieldPlaza;
 
-    // Paso 1: datos del coche
+    // datos del coche
     private JTextField fieldPatente;
     private JTextField fieldMarca;
     private JTextField fieldModelo;
-    private JComboBox<String> comboColor;  // mostramos String, luego lo convertimos a Clases.Color
+    private JComboBox<String> comboColor; 
 
-    // Paso 2: fechas
+    // fechas
     private JTextField fieldFechaInicio;   // dd/MM/yyyy HH:mm
-    private JTextField fieldFechaFin;      // dd/MM/yyyy HH:mm
+    private JTextField fieldFechaFin;      
 
-    // Navegación (dos pantallas dentro del mismo diálogo)
+    
     private java.awt.CardLayout cardLayout;
     private JPanel cardPanel;
     private JButton btnAtras;
@@ -86,21 +84,21 @@ public class ReservationDialog extends JDialog {
         getRootPane().getActionMap().put(actionKey, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispose();  // Cierra el diálogo
+                dispose(); 
             }
         });
-        // Campo común: plaza
+        
         fieldPlaza = new JTextField();
         fieldPlaza.setEnabled(false);
 
-        // ---------- PANTALLA 1: DATOS DEL COCHE ----------
+        
         JPanel panelCoche = new JPanel(new GridLayout(5, 2, 10, 10));
 
         fieldPatente = new JTextField(10);
         fieldMarca   = new JTextField(10);
         fieldModelo  = new JTextField(10);
 
-        // Primer elemento = placeholder
+        
         String[] opcionesColor = {
                 "Seleccione color",
                 "BLANCO", "NEGRO", "AZUL", "ROJO",
@@ -140,19 +138,19 @@ public class ReservationDialog extends JDialog {
         panelFechas.add(new JLabel(" Fecha/hora fin (dd/mm/yyyy xx:xx):"));
         panelFechas.add(fieldFechaFin);
 
-        // ---------- CardLayout con los dos pasos ----------
+        
         cardLayout = new java.awt.CardLayout();
         cardPanel = new JPanel(cardLayout);
         cardPanel.add(panelCoche, "COCHE");
         cardPanel.add(panelFechas, "FECHAS");
 
-        // ---------- Panel de botones ----------
+     
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnAtras     = new JButton("Atrás");
         btnSiguiente = new JButton("Siguiente");
         btnCancelar  = new JButton("Cancelar");
 
-        btnAtras.setEnabled(false); // no se puede ir atrás desde el paso 1
+        btnAtras.setEnabled(false); 
 
         if (estaOcupada) {
             btnSiguiente.setText("Plaza ocupada (No reservar)");
@@ -171,7 +169,7 @@ public class ReservationDialog extends JDialog {
         buttonPanel.add(btnAtras);
         buttonPanel.add(btnSiguiente);
 
-        // ---------- Listeners de botones ----------
+        
 
         // Cancelar
         btnCancelar.addActionListener(new ActionListener() {
@@ -245,7 +243,7 @@ public class ReservationDialog extends JDialog {
         this.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    // ---------- Validación paso 1: coche ----------
+
     private boolean validarPasoCoche() {
         String matricula = fieldPatente.getText().trim();
         String marca     = fieldMarca.getText().trim();
@@ -262,7 +260,7 @@ public class ReservationDialog extends JDialog {
             return false;
         }
 
-        if (comboColor.getSelectedIndex() == 0) { // "Seleccione color"
+        if (comboColor.getSelectedIndex() == 0) { 
             JOptionPane.showMessageDialog(
                     this,
                     "Debe seleccionar el color de su coche.",
@@ -272,16 +270,16 @@ public class ReservationDialog extends JDialog {
             return false;
         }
 
-        // Guardar datos normalizados
+       
         matriculaSeleccionada = matricula;
         marcaSeleccionada     = marca;
         modeloSeleccionado    = modelo;
 
-        // Convertimos el texto a enum Clases.Color (nombres en mayúsculas)
+       
         try {
             colorSeleccionado = Clases.Color.valueOf(colorTxt.toUpperCase());
         } catch (IllegalArgumentException ex) {
-            // Por si acaso no coincide exactamente, lo mandamos a OTROS si existe
+            
             try {
                 colorSeleccionado = Clases.Color.valueOf("OTROS");
             } catch (Exception ex2) {
@@ -292,7 +290,7 @@ public class ReservationDialog extends JDialog {
         return true;
     }
 
-    // ---------- Validación paso 2: fechas ----------
+  
     private boolean validarPasoFechas() {
         String txtInicio = fieldFechaInicio.getText().trim();
         String txtFin    = fieldFechaFin.getText().trim();
@@ -324,9 +322,9 @@ public class ReservationDialog extends JDialog {
         }
 
         LocalDateTime ahora = LocalDateTime.now();
-        LocalDateTime limiteInicioMax = ahora.plusDays(3);   // inicio <= ahora + 3 días
+        LocalDateTime limiteInicioMax = ahora.plusDays(3);   
 
-        // a) inicio no en el pasado
+        
         if (fechaInicio.isBefore(ahora)) {
             JOptionPane.showMessageDialog(
                     this,
@@ -337,7 +335,7 @@ public class ReservationDialog extends JDialog {
             return false;
         }
 
-        // b) inicio máximo 3 días desde ahora
+       
         if (fechaInicio.isAfter(limiteInicioMax)) {
             JOptionPane.showMessageDialog(
                     this,
@@ -349,7 +347,7 @@ public class ReservationDialog extends JDialog {
             return false;
         }
 
-        // c) fin > inicio
+        
         if (!fechaFin.isAfter(fechaInicio)) {
             JOptionPane.showMessageDialog(
                     this,
@@ -360,7 +358,7 @@ public class ReservationDialog extends JDialog {
             return false;
         }
 
-        // d) fin <= inicio + 24 horas
+        //  MAX 24 horas
         LocalDateTime limiteFinMax = fechaInicio.plusHours(24);
         if (fechaFin.isAfter(limiteFinMax)) {
             JOptionPane.showMessageDialog(
@@ -379,7 +377,7 @@ public class ReservationDialog extends JDialog {
         return true;
     }
 
-    // ---------- Getters públicos para usar desde el panel ----------
+    
 
     public boolean isReservaConfirmada() {
         return reservaConfirmada;

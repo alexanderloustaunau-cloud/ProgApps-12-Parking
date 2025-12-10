@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import Clases.Parking;
+import MAIN.GestorDB; 
 
 public class GUI extends JFrame {
 
@@ -30,9 +31,11 @@ public class GUI extends JFrame {
     
     private ParkingsPanel parkingsPanel;     
     private Parkingviewpanel parkingPanelMapa; 
+    
+    private GestorDB gestorDB;
 
     
-    // 👉 Lista con TODOS los parkings del proyecto
+    // Lista TODOS los parkings
     private List<Parking> parkings;
 
     public GUI() {
@@ -44,14 +47,17 @@ public class GUI extends JFrame {
         this.setLayout(new BorderLayout()); 
 
         contentPanel.setLayout(cardLayout);
+        
+        gestorDB = new GestorDB();
+        gestorDB.initDatabase();
 
-     // 1) Obtenemos los parkings del proyecto (como tú querías)
+     // 1) Obtenemos los parkings del proyecto 
      parkings = ParkingDataProvider.getParkings();
 
      // 2) Inicializamos datos de ejemplo sobre ESOS parkings
-     DataInitializer.inicializarDatos(parkings);
+     IniciarDatos.inicializarDatos(parkings,gestorDB);
 
-     // 3) Usamos esa misma lista en los paneles
+     
      parkingsPanel = new ParkingsPanel(parkings);
      HistorialReservas reservasPanel = new HistorialReservas(parkings);
 
@@ -124,7 +130,7 @@ public class GUI extends JFrame {
         this.add(menuPanel, BorderLayout.WEST);
         this.add(contentPanel, BorderLayout.CENTER); 
 
-        // Cuando el usuario le da a "Continuar" en ParkingsPanel:
+        // Continuar
         parkingsPanel.getBtnContinuar().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -142,10 +148,10 @@ public class GUI extends JFrame {
                     return;
                 }
 
-                // Crear el mapa de esa planta en el parking seleccionado
+               
                 parkingPanelMapa = new Parkingviewpanel(parentFrame, parkingSel, plantaSel);
 
-             // Lanzar el hilo que mantiene la planta actualizada
+        
              ParkingUpdaterThread updater = new ParkingUpdaterThread(
                      parkingSel,
                      plantaSel,
