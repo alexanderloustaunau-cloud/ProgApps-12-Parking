@@ -32,7 +32,7 @@ public class Parkingviewpanel extends JPanel {
     
     private final Color COLOR_LIBRE   = new Color(76, 175, 80);
     private final Color COLOR_OCUPADO = new Color(244, 67, 54);
-    private final Color COLOR_FUTURA  = new Color(33, 150, 243);
+    private final Color COLOR_FUTURA  = new Color(255, 165, 0);
     private final Color COLOR_SIM     = new Color(244, 67, 54);
 
     private JFrame parentFrame;
@@ -129,12 +129,12 @@ public class Parkingviewpanel extends JPanel {
 
         JLabel rmpDown = new JLabel("RAMPA ↓", SwingConstants.CENTER);
         rmpDown.setOpaque(true);
-        rmpDown.setBackground(new Color(200, 120, 0));
+        rmpDown.setBackground(new Color(120, 144, 156));
         rmpDown.setForeground(Color.WHITE);
 
         JLabel rmpUp = new JLabel(esPlanta1 ? "SUBIDA ↑" : "RAMPA ↑", SwingConstants.CENTER);
         rmpUp.setOpaque(true);
-        rmpUp.setBackground(new Color(200, 120, 0));
+        rmpUp.setBackground(new Color(120, 144, 156));
         rmpUp.setForeground(Color.WHITE);
 
         GridBagConstraints gbc = new GridBagConstraints();
