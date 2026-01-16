@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -106,9 +107,11 @@ public class ParkingsPanel extends JPanel {
         panelImagenes.setOpaque(false);
         labelImg1 = new JLabel();
         labelImg1.setHorizontalAlignment(SwingConstants.CENTER);
+        labelImg1.setPreferredSize(new Dimension(400, 250));
 
         labelImg2 = new JLabel();
         labelImg2.setHorizontalAlignment(SwingConstants.CENTER);
+        labelImg2.setPreferredSize(new Dimension(400, 250));
         panelImagenes.add(labelImg1);
         panelImagenes.add(labelImg2);
         panelCentroContenido.add(panelImagenes, BorderLayout.CENTER);
@@ -172,11 +175,22 @@ public class ParkingsPanel extends JPanel {
     		return;
     	}
     	try {
-            labelImg1.setIcon(new ImageIcon(getClass().getResource(p.getImagen1())));
-            labelImg2.setIcon(new ImageIcon(getClass().getResource(p.getImagen2())));
+    		cargarImagenEnLabel(labelImg1, p.getImagen1());
+    		cargarImagenEnLabel(labelImg2, p.getImagen2());
         } catch (Exception e) {
             System.err.println("No se han podido cargar imágenes del parking " + p.getNombre());
         }
+    }
+    private void cargarImagenEnLabel(JLabel label, String ruta) {
+    	ImageIcon icon = new ImageIcon(getClass().getResource(ruta));
+    	int ancho = label.getPreferredSize().width;
+    	int alto = label.getPreferredSize().height;
+    	Image imagenEscalada = icon.getImage().getScaledInstance(
+    			ancho,
+    			alto,
+    			java.awt.Image.SCALE_SMOOTH
+    			);
+    	label.setIcon(new ImageIcon(imagenEscalada));
     }
     }
 

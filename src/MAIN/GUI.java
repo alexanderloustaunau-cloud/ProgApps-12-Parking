@@ -78,7 +78,7 @@ public class GUI extends JFrame {
         String[] botones = {"Ubicaciones", "Reservas", "Mi Perfil", "Ayuda"};
         String[] tarjetas = {"UBICACIONES", "RESERVAS", "MI_PERFIL", "AYUDA"};
 
-        JButton btnReservar = new JButton("RESERVAR PLAZA");
+        JButton btnReservar = new JButton("<html>RESERVAR<br>PLAZA</html>");
         btnReservar.setBackground(new Color(0, 150, 0));
         btnReservar.setForeground(Color.WHITE);
         btnReservar.setFont(btnReservar.getFont().deriveFont(Font.BOLD, 14f));

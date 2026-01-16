@@ -17,7 +17,7 @@ public final class ParkingDataProvider {
         Parking p2 = new Parking("Leioa", 2, 100);
         Parking p3 = new Parking("San Mamés", 5, 100);
         p1.setImagen1("/Deusto.jpg");
-        p1.setImagen2("UDeusto mapa.png");
+        p1.setImagen2("/Deustomap.jpg");
         p2.setImagen1("/Leioa.jpg");
         p2.setImagen2("/LeioaMap.png");
         p3.setImagen1("/San Mames.jpg");
