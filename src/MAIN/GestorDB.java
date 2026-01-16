@@ -1,4 +1,5 @@
-package MAIN;  
+package MAIN;
+
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -12,287 +13,302 @@ import Clases.Reserva;
 
 public class GestorDB {
 
-    private static final String SQLITE_FILE = "resources/db/parking.db";
-    private static final String CONNECTION_STRING = "jdbc:sqlite:" + SQLITE_FILE;
+	private static final String SQLITE_FILE = "Resources/db/parking.db";
+	private static final String CONNECTION_STRING = "jdbc:sqlite:" + SQLITE_FILE;
 
-   
-    private static final DateTimeFormatter FMT_DB = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+	private static final DateTimeFormatter FMT_DB = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-    public GestorDB() {
-        try {
-            Class.forName("org.sqlite.JDBC");
-            
-        } catch (ClassNotFoundException e) {
-            System.err.format("* Error al cargar el driver de la BBDD: %s\n", e.getMessage());
-        }
-    }
+	public GestorDB() {
+		try {
+			Class.forName("org.sqlite.JDBC");
 
-    
-    public void initDatabase() {
-        try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
-             Statement st = con.createStatement()) {
+		} catch (ClassNotFoundException e) {
+			System.err.format("* Error al cargar el driver de la BBDD: %s\n", e.getMessage());
+		}
+	}
 
-            st.execute("PRAGMA foreign_keys = ON;");
+	public void initDatabase() {
+		try (Connection con = DriverManager.getConnection(CONNECTION_STRING); Statement st = con.createStatement()) {
 
-            st.execute("""
-                CREATE TABLE IF NOT EXISTS PARKING (
-                    id        INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nombre    TEXT NOT NULL UNIQUE,
-                    direccion TEXT
-                );
-            """);
+			st.execute("PRAGMA foreign_keys = ON;");
 
-            st.execute("""
-                CREATE TABLE IF NOT EXISTS PLANTA (
-                    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-                    parking_id INTEGER NOT NULL,
-                    numero     INTEGER NOT NULL,
-                    UNIQUE (parking_id, numero),
-                    FOREIGN KEY (parking_id) REFERENCES PARKING(id)
-                        ON UPDATE CASCADE
-                        ON DELETE CASCADE
-                );
-            """);
+			st.execute("""
+					    CREATE TABLE IF NOT EXISTS PARKING (
+					        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+					        nombre    TEXT NOT NULL UNIQUE,
+					        direccion TEXT
+					    );
+					""");
 
-            st.execute("""
-                CREATE TABLE IF NOT EXISTS PLAZA (
-                    id        INTEGER PRIMARY KEY AUTOINCREMENT,
-                    planta_id INTEGER NOT NULL,
-                    numero    INTEGER NOT NULL,
-                    tipo      TEXT,
-                    UNIQUE (planta_id, numero),
-                    FOREIGN KEY (planta_id) REFERENCES PLANTA(id)
-                        ON UPDATE CASCADE
-                        ON DELETE CASCADE
-                );
-            """);
+			st.execute("""
+					    CREATE TABLE IF NOT EXISTS PLANTA (
+					        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+					        parking_id INTEGER NOT NULL,
+					        numero     INTEGER NOT NULL,
+					        UNIQUE (parking_id, numero),
+					        FOREIGN KEY (parking_id) REFERENCES PARKING(id)
+					            ON UPDATE CASCADE
+					            ON DELETE CASCADE
+					    );
+					""");
 
-            st.execute("""
-                CREATE TABLE IF NOT EXISTS COCHE (
-                    matricula TEXT PRIMARY KEY,
-                    marca     TEXT NOT NULL,
-                    modelo    TEXT NOT NULL,
-                    color     TEXT
-                );
-            """);
+			st.execute("""
+					    CREATE TABLE IF NOT EXISTS PLAZA (
+					        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+					        planta_id INTEGER NOT NULL,
+					        numero    INTEGER NOT NULL,
+					        tipo      TEXT,
+					        UNIQUE (planta_id, numero),
+					        FOREIGN KEY (planta_id) REFERENCES PLANTA(id)
+					            ON UPDATE CASCADE
+					            ON DELETE CASCADE
+					    );
+					""");
 
-            st.execute("""
-                CREATE TABLE IF NOT EXISTS RESERVA (
-                    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-                    matricula    TEXT NOT NULL,
-                    plaza_id     INTEGER NOT NULL,
-                    fecha_inicio TEXT NOT NULL,
-                    fecha_fin    TEXT NOT NULL,
-                    estado       TEXT NOT NULL CHECK (
-                                   estado IN ('PENDIENTE','EN_CURSO','FINALIZADA')
-                                 ),
-                    FOREIGN KEY (matricula) REFERENCES COCHE(matricula)
-                        ON UPDATE CASCADE
-                        ON DELETE RESTRICT,
-                    FOREIGN KEY (plaza_id)  REFERENCES PLAZA(id)
-                        ON UPDATE CASCADE
-                        ON DELETE RESTRICT
-                );
-            """);
+			st.execute("""
+					    CREATE TABLE IF NOT EXISTS COCHE (
+					        matricula TEXT PRIMARY KEY,
+					        marca     TEXT NOT NULL,
+					        modelo    TEXT NOT NULL,
+					        color     TEXT
+					    );
+					""");
 
-            System.out.println("Base de datos de parking inicializada correctamente.");
+			st.execute("""
+					    CREATE TABLE IF NOT EXISTS RESERVA (
+					        id           INTEGER PRIMARY KEY AUTOINCREMENT,
+					        matricula    TEXT NOT NULL,
+					        plaza_id     INTEGER NOT NULL,
+					        fecha_inicio TEXT NOT NULL,
+					        fecha_fin    TEXT NOT NULL,
+					        estado       TEXT NOT NULL CHECK (
+					                       estado IN ('PENDIENTE','EN_CURSO','FINALIZADA')
+					                     ),
+					        FOREIGN KEY (matricula) REFERENCES COCHE(matricula)
+					            ON UPDATE CASCADE
+					            ON DELETE RESTRICT,
+					        FOREIGN KEY (plaza_id)  REFERENCES PLAZA(id)
+					            ON UPDATE CASCADE
+					            ON DELETE RESTRICT
+					    );
+					""");
 
-        } catch (SQLException e) {
-            System.err.println("* Error creando tablas: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
+			System.out.println("Base de datos de parking inicializada correctamente.");
 
-    
-    // COCHES
-    
-    public boolean guardarCoche(Coche c) {
-        String sql = """
-            INSERT INTO COCHE (matricula, marca, modelo, color)
-            VALUES (?, ?, ?, ?)
-            ON CONFLICT(matricula) DO UPDATE SET
-              marca = excluded.marca,
-              modelo = excluded.modelo,
-              color = excluded.color;
-        """;
+		} catch (SQLException e) {
+			System.err.println("* Error creando tablas: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
 
-        try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
-             PreparedStatement ps = con.prepareStatement(sql)) {
+	// COCHES
 
-            ps.setString(1, c.getMatricula());
-            ps.setString(2, c.getMarca());
-            ps.setString(3, c.getModelo());
-            ps.setString(4, c.getColor() != null ? c.getColor().name() : null);
+	public boolean guardarCoche(Coche c) {
+		String sql = """
+				    INSERT INTO COCHE (matricula, marca, modelo, color)
+				    VALUES (?, ?, ?, ?)
+				    ON CONFLICT(matricula) DO UPDATE SET
+				      marca = excluded.marca,
+				      modelo = excluded.modelo,
+				      color = excluded.color;
+				""";
 
-            return ps.executeUpdate() >= 1;
+		try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
-        } catch (SQLException e) {
-            System.err.format("* Error guardando coche '%s': %s\n", c.getMatricula(), e.getMessage());
-            return false;
-        }
-    }
+			ps.setString(1, c.getMatricula());
+			ps.setString(2, c.getMarca());
+			ps.setString(3, c.getModelo());
+			ps.setString(4, c.getColor() != null ? c.getColor().name() : null);
 
-   
-    public Coche getCoche(String matricula) {
-        String sql = "SELECT matricula, marca, modelo, color FROM COCHE WHERE matricula = ?";
+			return ps.executeUpdate() >= 1;
 
-        try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
-             PreparedStatement ps = con.prepareStatement(sql)) {
+		} catch (SQLException e) {
+			System.err.format("* Error guardando coche '%s': %s\n", c.getMatricula(), e.getMessage());
+			return false;
+		}
+	}
 
-            ps.setString(1, matricula);
-            ResultSet rs = ps.executeQuery();
+	public Coche getCoche(String matricula) {
+		String sql = "SELECT matricula, marca, modelo, color FROM COCHE WHERE matricula = ?";
 
-            if (rs.next()) {
-                String mat   = rs.getString("matricula");
-                String marca = rs.getString("marca");
-                String modelo= rs.getString("modelo");
-                String col   = rs.getString("color");
+		try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
-                Color color = null;
-                if (col != null) {
-                    try { color = Color.valueOf(col); } catch (IllegalArgumentException ignored) {}
-                }
-                return new Coche(mat, marca, modelo, color);
-            }
+			ps.setString(1, matricula);
+			ResultSet rs = ps.executeQuery();
 
-        } catch (SQLException e) {
-            System.err.format("* Error obteniendo coche '%s': %s\n", matricula, e.getMessage());
-        }
-        return null;
-    }
+			if (rs.next()) {
+				String mat = rs.getString("matricula");
+				String marca = rs.getString("marca");
+				String modelo = rs.getString("modelo");
+				String col = rs.getString("color");
 
-    
-    public List<Coche> loadCoches() {
-        List<Coche> lista = new ArrayList<>();
-        String sql = "SELECT matricula, marca, modelo, color FROM COCHE";
+				Color color = null;
+				if (col != null) {
+					try {
+						color = Color.valueOf(col);
+					} catch (IllegalArgumentException ignored) {
+					}
+				}
+				return new Coche(mat, marca, modelo, color);
+			}
 
-        try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+		} catch (SQLException e) {
+			System.err.format("* Error obteniendo coche '%s': %s\n", matricula, e.getMessage());
+		}
+		return null;
+	}
 
-            while (rs.next()) {
-                String mat   = rs.getString("matricula");
-                String marca = rs.getString("marca");
-                String modelo= rs.getString("modelo");
-                String col   = rs.getString("color");
+	public List<Coche> loadCoches() {
+		List<Coche> lista = new ArrayList<>();
+		String sql = "SELECT matricula, marca, modelo, color FROM COCHE";
 
-                Color color = null;
-                if (col != null) {
-                    try { color = Color.valueOf(col); } catch (IllegalArgumentException ignored) {}
-                }
-                lista.add(new Coche(mat, marca, modelo, color));
-            }
+		try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
+				PreparedStatement ps = con.prepareStatement(sql);
+				ResultSet rs = ps.executeQuery()) {
 
-        } catch (SQLException e) {
-            System.err.format("* Error cargando coches: %s\n", e.getMessage());
-        }
-        return lista;
-    }
+			while (rs.next()) {
+				String mat = rs.getString("matricula");
+				String marca = rs.getString("marca");
+				String modelo = rs.getString("modelo");
+				String col = rs.getString("color");
 
-    
-    // RESERVAS
- 
+				Color color = null;
+				if (col != null) {
+					try {
+						color = Color.valueOf(col);
+					} catch (IllegalArgumentException ignored) {
+					}
+				}
+				lista.add(new Coche(mat, marca, modelo, color));
+			}
 
-   
-    private String toDB(LocalDateTime dt) {
-        return dt.format(FMT_DB);
-    }
+		} catch (SQLException e) {
+			System.err.format("* Error cargando coches: %s\n", e.getMessage());
+		}
+		return lista;
+	}
 
- 
-    private LocalDateTime fromDB(String txt) {
-        return LocalDateTime.parse(txt, FMT_DB);
-    }
+	// RESERVAS
 
-   
-    public boolean insertarReserva(Reserva r, int plazaId, String estado) {
-        String sql = """
-            INSERT INTO RESERVA (matricula, plaza_id, fecha_inicio, fecha_fin, estado)
-            VALUES (?, ?, ?, ?, ?);
-        """;
+	private String toDB(LocalDateTime dt) {
+		return dt.format(FMT_DB);
+	}
 
-        try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
-             PreparedStatement ps = con.prepareStatement(sql)) {
+	private LocalDateTime fromDB(String txt) {
+		return LocalDateTime.parse(txt, FMT_DB);
+	}
 
-            ps.setString(1, r.getCoche().getMatricula());
-            ps.setInt(2, plazaId);
-            ps.setString(3, toDB(r.getFechaInicio()));
-            ps.setString(4, toDB(r.getFechaFin()));
-            ps.setString(5, estado);
+	public boolean insertarReserva(Reserva r, int plazaId, String estado) {
+		String sql = """
+				    INSERT INTO RESERVA (matricula, plaza_id, fecha_inicio, fecha_fin, estado)
+				    VALUES (?, ?, ?, ?, ?);
+				""";
 
-            return ps.executeUpdate() == 1;
+		try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
-        } catch (SQLException e) {
-            System.err.format("* Error insertando reserva de '%s': %s\n",
-                    r.getCoche().getMatricula(), e.getMessage());
-            return false;
-        }
-    }
+			ps.setString(1, r.getCoche().getMatricula());
+			ps.setInt(2, plazaId);
+			ps.setString(3, toDB(r.getFechaInicio()));
+			ps.setString(4, toDB(r.getFechaFin()));
+			ps.setString(5, estado);
 
-    
-    public List<Reserva> loadReservasPorMatricula(String matricula, PlazaResolver plazaResolver) {
-        List<Reserva> lista = new ArrayList<>();
+			return ps.executeUpdate() == 1;
 
-        String sql = """
-            SELECT id, plaza_id, fecha_inicio, fecha_fin, estado
-            FROM RESERVA
-            WHERE matricula = ?
-            ORDER BY fecha_inicio;
-        """;
+		} catch (SQLException e) {
+			System.err.format("* Error insertando reserva de '%s': %s\n", r.getCoche().getMatricula(), e.getMessage());
+			return false;
+		}
+	}
 
-        try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
-             PreparedStatement ps = con.prepareStatement(sql)) {
+	public List<Reserva> loadReservasPorMatricula(String matricula, PlazaResolver plazaResolver) {
+		List<Reserva> lista = new ArrayList<>();
 
-            ps.setString(1, matricula);
-            ResultSet rs = ps.executeQuery();
+		String sql = """
+				    SELECT id, plaza_id, fecha_inicio, fecha_fin, estado
+				    FROM RESERVA
+				    WHERE matricula = ?
+				    ORDER BY fecha_inicio;
+				""";
 
-            // Obtenemos el coche una sola vez
-            Coche coche = getCoche(matricula);
-            if (coche == null) {
-                return lista;
-            }
+		try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                int plazaId        = rs.getInt("plaza_id");
-                String inicioTxt   = rs.getString("fecha_inicio");
-                String finTxt      = rs.getString("fecha_fin");
-                String estado      = rs.getString("estado");
+			ps.setString(1, matricula);
+			ResultSet rs = ps.executeQuery();
 
-                LocalDateTime inicio = fromDB(inicioTxt);
-                LocalDateTime fin    = fromDB(finTxt);
+			// Obtenemos el coche una sola vez
+			Coche coche = getCoche(matricula);
+			if (coche == null) {
+				return lista;
+			}
 
-                Plaza plaza = plazaResolver.obtenerPlazaPorId(plazaId);
+			while (rs.next()) {
+				int plazaId = rs.getInt("plaza_id");
+				String inicioTxt = rs.getString("fecha_inicio");
+				String finTxt = rs.getString("fecha_fin");
+				String estado = rs.getString("estado");
 
-                Reserva r = new Reserva(coche, plaza, inicio, fin);
-                
+				LocalDateTime inicio = fromDB(inicioTxt);
+				LocalDateTime fin = fromDB(finTxt);
 
-                lista.add(r);
-            }
+				Plaza plaza = plazaResolver.obtenerPlazaPorId(plazaId);
 
-        } catch (SQLException e) {
-            System.err.format("* Error cargando reservas de '%s': %s\n", matricula, e.getMessage());
-        }
-        return lista;
-    }
+				Reserva r = new Reserva(coche, plaza, inicio, fin);
 
-    
-    public boolean borrarReserva(long idReserva) {
-        String sql = "DELETE FROM RESERVA WHERE id = ?";
+				lista.add(r);
+			}
 
-        try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
-             PreparedStatement ps = con.prepareStatement(sql)) {
+		} catch (SQLException e) {
+			System.err.format("* Error cargando reservas de '%s': %s\n", matricula, e.getMessage());
+		}
+		return lista;
+	}
 
-            ps.setLong(1, idReserva);
-            return ps.executeUpdate() == 1;
+	public boolean borrarReserva(long idReserva) {
+		String sql = "DELETE FROM RESERVA WHERE id = ?";
 
-        } catch (SQLException e) {
-            System.err.format("* Error borrando reserva %d: %s\n", idReserva, e.getMessage());
-            return false;
-        }
-    }
+		try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
-   
-   
-    public interface PlazaResolver {
-        Plaza obtenerPlazaPorId(int idPlaza);
-    }
+			ps.setLong(1, idReserva);
+			return ps.executeUpdate() == 1;
+
+		} catch (SQLException e) {
+			System.err.format("* Error borrando reserva %d: %s\n", idReserva, e.getMessage());
+			return false;
+		}
+	}
+	
+	public int getPlazaId(String nombreParking, int numeroPlanta, int numeroPlaza) {
+	    String sql =
+	        "SELECT pz.id " +
+	        "FROM PLAZA pz " +
+	        "JOIN PLANTA pl ON pz.planta_id = pl.id " +
+	        "JOIN PARKING pk ON pl.parking_id = pk.id " +
+	        "WHERE pk.nombre = ? AND pl.numero = ? AND pz.numero = ?";
+
+	    try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
+	         PreparedStatement ps = con.prepareStatement(sql)) {
+
+	        ps.setString(1, nombreParking);
+	        ps.setInt(2, numeroPlanta);
+	        ps.setInt(3, numeroPlaza);
+
+	        ResultSet rs = ps.executeQuery();
+	        return rs.next() ? rs.getInt(1) : -1;
+
+	    } catch (SQLException e) {
+	        return -1;
+	    }
+	}
 }
+
+
+interface PlazaResolver {
+    Plaza obtenerPlazaPorId(int idPlaza);
+}
+
+

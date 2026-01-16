@@ -102,19 +102,23 @@ public class IniciarDatos {
             } else {
                 estado = "PENDIENTE";
             }
-
             
-            int plazaId = plaza.getIdBD(); 
+            int plazaId = gestorDB.getPlazaId(p.getNombre(), planta.getNumeroPlanta(), plaza.getNumero());
 
-           
-            gestorDB.insertarReserva(reserva, plazaId, estado);
 
-            reservasCreadas++;
+            if (plazaId == -1) {
+                System.out.println("* No existe esa plaza en BD, no inserto reserva.");
+            } else {
+                gestorDB.insertarReserva(reserva, plazaId, estado);
+                reservasCreadas++;
+            }
+
+
         }
 
         // 3) Reservas fijas para 1234ABC en Deusto 1, plazas 33–35
-        crearReservasFijas123ABC(parkings,gestorDB);
-    }
+        crearReservasFijas123ABC(parkings,gestorDB); }
+    
 
     
     private static String generarMatriculaAleatoria() {
@@ -251,10 +255,11 @@ public class IniciarDatos {
         
         gestorDB.guardarCoche(coche); 
         
-        int id33 = plaza33.getIdBD();
-        int id34 = plaza34.getIdBD();
-        int id35 = plaza35.getIdBD();
-        int id36 = plaza36.getIdBD();
+        int id33 = gestorDB.getPlazaId(deusto.getNombre(), planta1.getNumeroPlanta(), plaza33.getNumero());
+        int id34 = gestorDB.getPlazaId(deusto.getNombre(), planta1.getNumeroPlanta(), plaza34.getNumero());
+        int id35 = gestorDB.getPlazaId(deusto.getNombre(), planta1.getNumeroPlanta(), plaza35.getNumero());
+        int id36 = gestorDB.getPlazaId(deusto.getNombre(), planta1.getNumeroPlanta(), plaza36.getNumero());
+
         
         gestorDB.insertarReserva(r1, id33, "FINALIZADA");
         gestorDB.insertarReserva(r2, id34, "FINALIZADA");
