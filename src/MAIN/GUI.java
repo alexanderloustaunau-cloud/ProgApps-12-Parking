@@ -17,7 +17,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import Clases.Coche;
 import Clases.Parking;
+import Clases.Plaza;
+import Clases.Reserva;
 import MAIN.GestorDB; 
 
 public class GUI extends JFrame {
@@ -83,33 +86,90 @@ public class GUI extends JFrame {
         btnReservar.setForeground(Color.WHITE);
         btnReservar.setFont(btnReservar.getFont().deriveFont(Font.BOLD, 14f));
         menuPanel.add(btnReservar);
-
+        
         btnReservar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
+                Parking parkingSel = parkingsPanel.getParkingSeleccionado();
+                if (parkingSel == null) {
+                    JOptionPane.showMessageDialog(parentFrame, "Selecciona un parking primero.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 int respuesta = JOptionPane.showConfirmDialog(
-                    parentFrame, 
-                    "¿Desea iniciar una reserva sin seleccionar una plaza en el mapa? Esto asignará una plaza genérica.",
-                    "Reservar Plaza Genérica",
+                    parentFrame,
+                    "¿Desea iniciar una reserva sin seleccionar una plaza en el mapa?\n" +
+                    "Se asignará una plaza LIBRE aleatoria del parking seleccionado.",
+                    "Reserva automática",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE
                 );
 
-                if (respuesta == JOptionPane.YES_OPTION) {
-                    ReservationDialog dialog = new ReservationDialog(parentFrame, "LIBRE");
-                    dialog.setPlaza("No Asignada (Genérica)"); 
-                    dialog.setVisible(true);
-                } else {
-                    JOptionPane.showMessageDialog(
-                        parentFrame,
-                        "Seleccione una plaza libre directamente en el mapa para una reserva específica.",
-                        "Reserva Cancelada",
-                        JOptionPane.INFORMATION_MESSAGE
-                    );
+                if (respuesta != JOptionPane.YES_OPTION) return;
+
+                
+                PlazaAsignada asignada = elegirPlazaLibreAleatoria(parkingSel);
+                if (asignada == null) {
+                    JOptionPane.showMessageDialog(parentFrame,
+                            "No hay plazas disponibles (libres) en este parking ahora mismo.",
+                            "Sin disponibilidad",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    return;
                 }
+
+              
+                ReservationDialog dialog = new ReservationDialog(parentFrame, "LIBRE");
+                dialog.setPlaza("Parking: " + parkingSel.getNombre() +
+                        " | Planta: " + asignada.numPlanta +
+                        " | Plaza: P" + asignada.plaza.getNumero());
+                dialog.setVisible(true);
+
+                if (!dialog.isReservaConfirmada()) return;
+
+                
+                Coche coche = null;
+                for (Coche c : parkingSel.getListaCoches()) {
+                    if (c.getMatricula().equalsIgnoreCase(dialog.getMatriculaSeleccionada())) {
+                        coche = c;
+                        break;
+                    }
+                }
+                if (coche == null) {
+                    coche = new Coche(
+                        dialog.getMatriculaSeleccionada(),
+                        dialog.getMarcaSeleccionada(),
+                        dialog.getModeloSeleccionado(),
+                        dialog.getColorSeleccionado()
+                    );
+                    parkingSel.addCoche(coche);
+                }
+
+               
+                Reserva reserva = new Reserva(
+                    coche,
+                    asignada.plaza,
+                    dialog.getFechaInicioSeleccionada(),
+                    dialog.getFechaFinSeleccionada()
+                );
+                coche.addReserva(reserva);
+
+              
+                if (!reserva.getFechaInicio().isAfter(java.time.LocalDateTime.now())) {
+                    asignada.plaza.ocupar(coche);
+                }
+
+                JOptionPane.showMessageDialog(parentFrame,
+                        "Reserva guardada en el historial:\n" +
+                        parkingSel.getNombre() + " / Planta " + asignada.numPlanta +
+                        " / Plaza P" + asignada.plaza.getNumero(),
+                        "OK",
+                        JOptionPane.INFORMATION_MESSAGE);
             }
         });
+
+
 
         for (int i = 0; i < botones.length; i++) {
             JButton boton = new JButton(botones[i]);
@@ -179,6 +239,49 @@ public class GUI extends JFrame {
         panel.setBackground(new Color(240, 240, 240));
         return panel;
     }
+    
+    private static class PlazaAsignada {
+        Plaza plaza;
+        int numPlanta;
+        PlazaAsignada(Plaza plaza, int numPlanta) {
+            this.plaza = plaza;
+            this.numPlanta = numPlanta;
+        }
+    }
+
+    private PlazaAsignada elegirPlazaLibreAleatoria(Parking parking) {
+        java.time.LocalDateTime ahora = java.time.LocalDateTime.now();
+
+        java.util.List<PlazaAsignada> candidatas = new java.util.ArrayList<>();
+
+        for (Clases.Planta pl : parking.getPlantas()) {
+            for (Clases.Plaza plaza : pl.getPlazas()) {
+                if (esPlazaDisponible(parking, plaza, ahora)) {
+                    candidatas.add(new PlazaAsignada(plaza, pl.getNumeroPlanta()));
+                }
+            }
+        }
+
+        if (candidatas.isEmpty()) return null;
+
+        int indice = new java.util.Random().nextInt(candidatas.size());
+        return candidatas.get(indice);
+    }
+
+    private boolean esPlazaDisponible(Parking parking, Plaza plaza, java.time.LocalDateTime ahora) {
+        if (plaza.isOcupada()) return false;
+
+       
+        for (Coche c : parking.getListaCoches()) {
+            for (Reserva r : c.getReservas()) {
+                if (r.getPlaza() == plaza && r.getFechaFin().isAfter(ahora)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(() -> new GUI());

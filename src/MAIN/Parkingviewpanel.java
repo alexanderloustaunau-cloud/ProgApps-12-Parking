@@ -280,14 +280,28 @@ public class Parkingviewpanel extends JPanel {
     
     private Coche buscarOCrearCoche(String matricula, String marca, String modelo, Clases.Color color) {
 
-        for (Coche c : parking.getListaCoches()) {
-            if (c.getMatricula().equalsIgnoreCase(matricula)) return c;
-        }
+        Coche encontrado = buscmatric(parking.getListaCoches(), matricula, 0);
+        if (encontrado != null) return encontrado;
 
         Coche nuevo = new Coche(matricula, marca, modelo, color);
         parking.addCoche(nuevo);
         return nuevo;
     }
+
+    private Coche buscmatric(java.util.List<Coche> coches, String matricula, int i) {
+
+   
+        if (coches == null || i >= coches.size()) return null;
+
+        
+        if (coches.get(i).getMatricula().equalsIgnoreCase(matricula)) {
+            return coches.get(i);
+        }
+
+        
+        return buscmatric(coches, matricula, i + 1);
+    }
+
 
    
     private enum EstadoPlaza {
@@ -371,11 +385,25 @@ public class Parkingviewpanel extends JPanel {
     }
 
     private Reserva obtenerReservaDePlaza(Plaza p) {
-        for (Coche c : parking.getListaCoches()) {
-            for (Reserva r : c.getReservas()) {
-                if (r.getPlaza() == p) return r;
-            }
-        }
-        return null;
+        return obtenerReservaDePlazaRec(parking.getListaCoches(), p, 0);
     }
+
+    private Reserva obtenerReservaDePlazaRec(java.util.List<Coche> coches, Plaza p, int i) {
+        if (coches == null || i >= coches.size()) return null;
+
+        Reserva r = buscarReservaEnCocheRec(coches.get(i), p, 0);
+        if (r != null) return r;
+
+        return obtenerReservaDePlazaRec(coches, p, i + 1);
+    }
+
+    private Reserva buscarReservaEnCocheRec(Coche c, Plaza p, int j) {
+        if (c == null || c.getReservas() == null || j >= c.getReservas().size()) return null;
+
+        Reserva r = c.getReservas().get(j);
+        if (r.getPlaza() == p) return r;
+
+        return buscarReservaEnCocheRec(c, p, j + 1);
+    }
+
 }
